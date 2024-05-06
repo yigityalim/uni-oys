@@ -3,23 +3,21 @@
 class Database extends \PDO
 {
     private mixed $dbName;
-    private $type;
-    private $sql;
-    private $unionSql;
-    private $tableName;
-    private $where;
-    private $having;
-    private $grouped;
-    private $group_id;
-    private $join;
-    private $orderBy;
-    private $groupBy;
-    private $limit;
+    private array|string $type;
+    private string $sql;
+    private string $unionSql;
+    private string $tableName;
+    private array $where;
+    private array $having;
+    private bool $grouped;
+    private string $group_id;
+    private array $join;
+    private string $orderBy;
+    private string $groupBy;
+    private string $limit;
     public bool $debug = false;
-    public array $reference = [
-        'NOW()'
-    ];
-
+    public array $reference = ['NOW()'];
+    private static ?Database $instance;
     public function __construct($configFile = 'config.ini')
     {
         if (file_exists($configFile)) {
@@ -32,6 +30,7 @@ class Database extends \PDO
         } else {
             die('Config dosyası bulunamadı.');
         }
+
         try {
             parent::__construct('mysql:host=' . $host . ';dbname=' . $dbname, $username, $password);
             $this->dbName = $dbname;
@@ -39,15 +38,29 @@ class Database extends \PDO
             $this->query('SET NAMES ' . $charset);
             $this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+            self::$instance = $this;
         } catch (PDOException $e) {
             $this->showError($e);
         }
     }
 
+    public static function getInstance($configFile = 'config.ini'): static
+    {
+        if (!isset(self::$instance)) {
+            self::$instance = new self($configFile);
+        }
+
+        return self::$instance;
+    }
+
+    private function __clone() {}
+
     public function __destruct()
     {
         $this->sql = null;
+        $this->unionSql = null;
     }
+
 
     public function from($tableName): static
     {

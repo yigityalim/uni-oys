@@ -2,8 +2,8 @@
 
 use JetBrains\PhpStorm\NoReturn;
 
-const method = 'AES-128-ECB';
-const key = 'secret';
+const METHOD = 'AES-128-ECB';
+const KEY = 'secret';
 
 function session($key, $value = null)
 {
@@ -19,7 +19,7 @@ function session($key, $value = null)
 function logout(): void
 {
     session_destroy();
-    $_SESSION = [];
+    $_SESSION['user'] = null;
 }
 
 #[NoReturn] function redirect($url,  $status = 302): void
@@ -49,12 +49,12 @@ function fetch($key, $value, $method)
 
 function openssl_enc($data): bool|string
 {
-    return openssl_encrypt($data, method, key);
+    return openssl_encrypt($data, METHOD, KEY);
 }
 
 function openssl_dec($data): bool|string
 {
-    return openssl_decrypt($data, method, key);
+    return openssl_decrypt($data, METHOD, KEY);
 }
 
 function asset($path): string

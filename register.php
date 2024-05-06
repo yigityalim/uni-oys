@@ -49,18 +49,11 @@ if (
             ]);
 
             if ($query) {
-                $error = 'Kayıt başarılı';
+                session('user', $user);
+                redirect('index.php');
             } else {
                 $error = 'Kayıt başarısız';
             }
-
-            $user = $db
-                ->from('students')
-                ->where('student_no', $student_no)
-                ->first();
-
-            session('user', $user);
-            redirect('index.php');
         }
     }
 }
