@@ -1,15 +1,16 @@
 <?php
-require 'db.php';
-require 'helpers.php';
-session_start();
-if (session('user')) redirect('index.php');
+include 'Session.php';
+include 'helpers.php';
+include 'db.php';
+
+Session::checkLogin();
 
 $db = new Database();
 $error = null;
 
-if (post('student_no') && post('password')) {
-    $student_no = post('student_no');
-    $password = openssl_enc(post('password'));
+if (Helpers::post('student_no') && Helpers::post('password')) {
+    $student_no = Helpers::post('student_no');
+    $password = Helpers::openssl_enc(Helpers::post('password'));
     $user = $db
         ->from('students')
         ->where('student_no', $student_no)
@@ -17,8 +18,7 @@ if (post('student_no') && post('password')) {
         ->first();
 
     if ($user) {
-        session('user', $user);
-        redirect('index.php');
+        Session::set('user', $user, true);
     } else {
         $error = 'Kullanıcı adı veya şifre hatalı';
     }
@@ -36,7 +36,7 @@ if (post('student_no') && post('password')) {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#FF3131',
+                        primary: '#0f6cbf',
                     }
                 }
             }
@@ -46,7 +46,7 @@ if (post('student_no') && post('password')) {
 <body class="bg-[#E1E5E9] text-black min-h-dvh">
 <section class="p-4 min-h-svh w-full flex h-full items-center justify-center">
     <div class="bg-white mx-auto max-w-xl p-8 rounded flex flex-col gap-y-4 items-center justify-between shadow-lg">
-        <img src="./images/paket1.png"
+        <img src="https://oys2.baskent.edu.tr/pluginfile.php/1/core_admin/logo/0x200/1709033358/oys_banner.jpg"
              alt="Paket University" class="w-full object-cover">
         <?php if ($error): ?>
             <div class="bg-primary text-white p-2 rounded w-full text-center"><?= $error ?></div>

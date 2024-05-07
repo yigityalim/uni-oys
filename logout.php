@@ -1,6 +1,3 @@
 <?php
-require 'helpers.php';
-session_start();
-session_destroy();
-logout();
-redirect('login.php');
+require 'Session.php';
+Session::destroy();

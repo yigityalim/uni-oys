@@ -1,9 +1,9 @@
 <?php
-session_start();
 require 'helpers.php';
 require 'db.php';
+require 'Session.php';
 
-if (!session('user')) return;
+Session::checkLogin();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["image"])) {
     $target_dir = "public/images/";
@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["image"])) {
 
             $db = new Database();
             $db->update('students')
-                ->where('id', session('user')['id'])
+                ->where('id', Session::get('user')['id'])
                 ->set([
                     'picture' => $target_file
                 ]);

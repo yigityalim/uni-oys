@@ -1,34 +1,48 @@
 <?php
 
+/**
+ * Class BasicDB
+ *
+ * @author Tayfun Erbilen
+ * @web http://www.erbilen.net
+ * @mail tayfunerbilen@gmail.com
+ * @web http://www.mtkocak.com
+ * @mail mtkocak@gmail.com
+ * @date 13 April 2014
+ * @update 20 March 2019
+ * @author Midori Koçak
+ * @update 2 July 2015
+ */
 class Database extends \PDO
 {
-    private mixed $dbName;
-    private array|string $type;
-    private string $sql;
-    private string $unionSql;
-    private string $tableName;
-    private array $where;
-    private array $having;
-    private bool $grouped;
-    private string $group_id;
-    private array $join;
-    private string $orderBy;
-    private string $groupBy;
-    private string $limit;
-    public bool $debug = false;
-    public array $reference = ['NOW()'];
-    private static ?Database $instance;
-    public function __construct($configFile = 'config.ini')
+    private $dbName;
+    private $type;
+    private $sql;
+    private $unionSql;
+    private $tableName;
+    private $where;
+    private $having;
+    private $grouped;
+    private $group_id;
+    private $join;
+    private $orderBy;
+    private $groupBy;
+    private $limit;
+    public $debug = false;
+    public $reference = [
+        'NOW()'
+    ];
+
+    public function __construct()
     {
-        if (file_exists($configFile)) {
-            $config = parse_ini_file($configFile);
+
+        if (file_exists('config.ini')) {
+            $config = parse_ini_file('config.ini');
             $host = $config['host'];
             $dbname = $config['schema'];
             $username = $config['username'];
             $password = $config['password'];
             $charset = $config['charset'];
-        } else {
-            die('Config dosyası bulunamadı.');
         }
 
         try {
@@ -38,51 +52,32 @@ class Database extends \PDO
             $this->query('SET NAMES ' . $charset);
             $this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-            self::$instance = $this;
         } catch (PDOException $e) {
             $this->showError($e);
         }
     }
 
-    public static function getInstance($configFile = 'config.ini'): static
-    {
-        if (!isset(self::$instance)) {
-            self::$instance = new self($configFile);
-        }
-
-        return self::$instance;
-    }
-
-    private function __clone() {}
-
-    public function __destruct()
-    {
-        $this->sql = null;
-        $this->unionSql = null;
-    }
-
-
-    public function from($tableName): static
+    public function from($tableName)
     {
         $this->sql = 'SELECT * FROM ' . $tableName;
         $this->tableName = $tableName;
         return $this;
     }
 
-    public function select($columns): static
+    public function select($columns)
     {
         $this->sql = str_replace(' * ', ' ' . $columns . ' ', $this->sql);
         return $this;
     }
 
-    public function union(): static
+    public function union()
     {
         $this->type = 'union';
         $this->unionSql = $this->sql;
         return $this;
     }
 
-    public function group(Closure $fn): static
+    public function group(Closure $fn)
     {
         static $group_id = 0;
         $this->grouped = true;
@@ -92,7 +87,7 @@ class Database extends \PDO
         return $this;
     }
 
-    public function where($column, $value = '', $mark = '=', $logical = '&&'): static
+    public function where($column, $value = '', $mark = '=', $logical = '&&')
     {
         $this->where[] = [
             'column' => $column,
@@ -166,16 +161,15 @@ class Database extends \PDO
         return $this;
     }
 
-    public function all(): bool|array
+    public function all()
     {
         try {
             $query = $this->generateQuery();
-            return $query->fetchAll(parent::FETCH_ASSOC);
+            $result = $query->fetchAll(parent::FETCH_ASSOC);
+            return $result;
         } catch (PDOException $e) {
             $this->showError($e);
         }
-
-        return false;
     }
 
     public function first()
@@ -188,7 +182,7 @@ class Database extends \PDO
         }
     }
 
-    public function generateQuery(): bool|PDOStatement
+    public function generateQuery()
     {
         if ($this->join) {
             $this->sql .= implode(' ', $this->join);
@@ -219,10 +213,10 @@ class Database extends \PDO
         return $query;
     }
 
-    private function get_where($conditionType = 'where'): void
+    private function get_where($conditionType = 'where')
     {
         if (
-            (is_array($this->{$conditionType}) && count($this->{$conditionType}) > 0)
+        (is_array($this->{$conditionType}) && count($this->{$conditionType}) > 0)
         ) {
             $whereClause = ' ' . ($conditionType == 'having' ? 'HAVING' : 'WHERE') . ' ';
             $arrs = $this->{$conditionType};
@@ -315,20 +309,20 @@ class Database extends \PDO
         }
     }
 
-    public function insert($tableName): static
+    public function insert($tableName)
     {
         $this->sql = 'INSERT INTO ' . $tableName;
         return $this;
     }
 
-    public function set($data, $value = null): bool
+    public function set($data, $value = null)
     {
         try {
             if ($value) {
-                if (str_contains($value, '+')) {
+                if (strstr($value, '+')) {
                     $this->sql .= ' SET ' . $data . ' = ' . $data . ' ' . $value;
                     $executeValue = null;
-                } elseif (str_contains($value, '-')) {
+                } elseif (strstr($value, '-')) {
                     $this->sql .= ' SET ' . $data . ' = ' . $data . ' ' . $value;
                     $executeValue = null;
                 } else {
@@ -347,26 +341,25 @@ class Database extends \PDO
             $this->get_where('where');
             $this->get_where('having');
             $query = $this->prepare($this->sql);
-            return $query->execute($executeValue);
+            $result = $query->execute($executeValue);
+            return $result;
         } catch (PDOException $e) {
             $this->showError($e);
         }
-
-        return false;
     }
 
-    public function lastId(): bool|string
+    public function lastId()
     {
         return $this->lastInsertId();
     }
 
-    public function update($tableName): static
+    public function update($tableName)
     {
         $this->sql = 'UPDATE ' . $tableName;
         return $this;
     }
 
-    public function delete($tableName): static
+    public function delete($tableName)
     {
         $this->sql = 'DELETE FROM ' . $tableName;
         return $this;
@@ -412,7 +405,7 @@ class Database extends \PDO
     {
         $this->get_where('where');
         $this->get_where('having');
-        $this->showSuccess($this->sql, __CLASS__ . ' SQL Sorgusu');
+        return $this->errorTemplate($this->sql, __CLASS__ . ' SQL Sorgusu');
     }
 
     public function between($column, $values = [])
@@ -421,31 +414,37 @@ class Database extends \PDO
         return $this;
     }
 
-    public function in($column, $value): static
+    public function notBetween($column, $values = [])
+    {
+        $this->where($column, $values, 'NOT BETWEEN');
+        return $this;
+    }
+
+    public function in($column, $value)
     {
         $this->where($column, $value, 'IN');
         return $this;
     }
 
-    public function notIn($column, $value): static
+    public function notIn($column, $value)
     {
         $this->where($column, $value, 'NOT IN');
         return $this;
     }
 
-    public function like($column, $value): static
+    public function like($column, $value)
     {
         $this->where($column, $value, 'LIKE');
         return $this;
     }
 
-    public function notLike($column, $value): static
+    public function notLike($column, $value)
     {
         $this->where($column, $value, 'NOT LIKE');
         return $this;
     }
 
-    public function soundex($column, $value): static
+    public function soundex($column, $value)
     {
         $this->where($column, $value, 'SOUNDEX');
         return $this;
@@ -456,12 +455,12 @@ class Database extends \PDO
         die($name . '  metodu ' . __CLASS__ . ' sınıfı içinde bulunamadı.');
     }
 
-    private function showError(PDOException $error): void
+    private function showError(PDOException $error)
     {
         $this->errorTemplate($error->getMessage());
     }
 
-    private function errorTemplate($errorMsg, $title = null): void
+    private function errorTemplate($errorMsg, $title = null)
     {
         ?>
         <div class="db-error-msg-content">
@@ -495,55 +494,6 @@ class Database extends \PDO
         <?php
     }
 
-    private function showSuccess($successMsg, $title = null)
-    {
-        ?>
-        <div class="db-success-msg-content">
-            <div class="db-success-title">
-                <?= $title ? $title : __CLASS__ . ' Başarılı:' ?>
-            </div>
-            <div class="db-success-msg"><?= $successMsg ?></div>
-        </div>
-        <style>
-            .db-success-msg-content {
-                padding: 15px;
-                border-left: 5px solid #6495ED;
-                background: rgba(100, 149, 237, 0.10);
-                margin-bottom: 10px;
-                border-radius: 2px;
-            }
-
-            @media (prefers-color-scheme: dark) {
-                .db-success-msg-content {
-                    background: rgba(100, 149, 237, 0.60);
-                }
-
-                .db-success-title {
-                    color: #fff !important;
-                }
-
-                .db-success-msg {
-                    color: #fff !important;
-                }
-            }
-
-            .db-success-title {
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-                font-size: 16px;
-                font-weight: 500;
-                color: #6495ED;
-            }
-
-            .db-success-msg {
-                margin-top: 15px;
-                font-size: 14px;
-                font-family: Consolas, Monaco, Menlo, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, sans-serif;
-                color: rgba(100, 149, 237, 1);
-            }
-        </style>
-        <?php
-    }
-
     /**
      * Belirtilen tabloyu temizler
      *
@@ -554,6 +504,13 @@ class Database extends \PDO
     {
         return $this->query('TRUNCATE TABLE ' . $this->dbName . '.' . $tableName);
     }
+
+    /**
+     * Belirtilen tablonun auto_increment değerini ayarlar
+     *
+     * @param $tableName
+     * @return mixed
+     */
     public function setAutoIncrement($tableName, $ai = 1)
     {
         return $this->query("ALTER TABLE `{$tableName}` AUTO_INCREMENT = {$ai}")->fetch();

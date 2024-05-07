@@ -5,59 +5,63 @@ use JetBrains\PhpStorm\NoReturn;
 const METHOD = 'AES-128-ECB';
 const KEY = 'secret';
 
-function session($key, $value = null)
+class Helpers
 {
-    if ($value) {
-        $_SESSION[$key] = $value;
-    } else {
-        return $_SESSION[$key] ?? null;
+
+    public static function session($key, $value = null)
+    {
+        if ($value) {
+            $_SESSION[$key] = $value;
+        } else {
+            return $_SESSION[$key] ?? null;
+        }
+
+        return null;
     }
 
-    return null;
-}
-
-function logout(): void
-{
-    session_destroy();
-    $_SESSION['user'] = null;
-}
-
-#[NoReturn] function redirect($url,  $status = 302): void
-{
-    header("Location: $url", true, $status);
-    exit;
-}
-
-function get($key, $value = null)
-{
-    return fetch($key, $value, 'GET');
-}
-
-function post($key, $value = null)
-{
-    return fetch($key, $value, 'POST');
-}
-
-function fetch($key, $value, $method)
-{
-    if ($method === 'GET') {
-        return $_GET[$key] ?? $value;
-    } else {
-        return $_POST[$key] ?? $value;
+    public static function logout(): void
+    {
+        session_destroy();
+        $_SESSION['user'] = null;
     }
-}
 
-function openssl_enc($data): bool|string
-{
-    return openssl_encrypt($data, METHOD, KEY);
-}
+    public static function redirect($url,  $status = 302): void
+    {
+        header("Location: $url", true, $status);
+        exit;
+    }
 
-function openssl_dec($data): bool|string
-{
-    return openssl_decrypt($data, METHOD, KEY);
-}
+    public function get($key, $value = null)
+    {
+        return self::fetch($key, $value, 'GET');
+    }
 
-function asset($path): string
-{
-    return "/$path";
+    public static function post($key, $value = null)
+    {
+        return self::fetch($key, $value, 'POST');
+    }
+
+    public static function fetch($key, $value, $method)
+    {
+        if ($method === 'GET') {
+            return $_GET[$key] ?? $value;
+        } else {
+            return $_POST[$key] ?? $value;
+        }
+    }
+
+    public static function openssl_enc($data): bool|string
+    {
+        return openssl_encrypt($data, METHOD, KEY);
+    }
+
+    public static function openssl_dec($data): bool|string
+    {
+        return openssl_decrypt($data, METHOD, KEY);
+    }
+
+    public static function asset($path): string
+    {
+        return "/$path";
+    }
 }
