@@ -9,7 +9,6 @@ Session::checkLogin();
 $db = new Database();
 $error = null;
 
-
 if (
     Helpers::post('name') &&
     Helpers::post('surname') &&
@@ -18,7 +17,7 @@ if (
     Helpers::post('password') &&
     Helpers::post('password_confirmation') &&
     Helpers::post('faculty') &&
-    Helpers::post('department')
+    Helpers::post('department') &&
 ) {
     $name = Helpers::post('name');
     $surname = Helpers::post('surname');
@@ -39,6 +38,7 @@ if (
 
         if ($user) {
             $error = 'Bu öğrenci numarası ile kayıtlı bir kullanıcı bulunmaktadır';
+            exit;
         } else {
             $query = $db->insert('students')->set([
                 'name' => $name,
@@ -58,6 +58,8 @@ if (
             }
         }
     }
+} else {
+    $error = 'Lütfen tüm alanları doldurunuz';
 }
 ?>
 <!DOCTYPE html>
@@ -79,16 +81,17 @@ if (
             }
         }
     </script>
+    <script src="./js/app.js" defer async type="module"></script>
 </head>
 
 <body class="bg-[#E1E5E9] text-black min-h-dvh">
     <section class="p-4 min-h-svh w-full flex h-full items-center justify-center">
         <div class="bg-white mx-auto max-w-xl p-8 rounded flex flex-col gap-y-4 items-center justify-between shadow-lg">
-            <img src="https://oys2.baskent.edu.tr/pluginfile.php/1/core_admin/logo/0x200/1709033358/oys_banner.jpg" alt="Baskent University" class="w-full object-cover">
+            <img src="./images/paket1.png" alt="Baskent University" class="w-full object-cover">
             <?php if ($error) : ?>
                 <div class="bg-red-500 text-white p-2 rounded w-full text-center"><?= $error ?></div>
             <?php endif; ?>
-            <form action="<?= $_SERVER['PHP_SELF'] ?>" method="post" class="flex flex-col gap-4 w-full">
+            <form id="submitForm" action="<?= $_SERVER['PHP_SELF'] ?>" method="post" class="flex flex-col gap-4 w-full">
                 <label>
                     <input type="text" name="name" placeholder="Adınız" class="p-2 border border-gray-300 rounded w-full focus:outline-blue-500">
                 </label>
@@ -114,7 +117,7 @@ if (
                 <label>
                     <input type="text" name="department" placeholder="Bölümünüz" class="p-2 border border-gray-300 rounded w-full focus:outline-blue-500">
                 </label>
-                <button type="submit" class="p-2 bg-primary text-white rounded">Kayıt ol</button>
+                <button class="w-full p-2 bg-primary text-white rounded">Kayıt ol</button>
             </form>
             <div class="w-full flex items-center justify-end">
                 <a href="login.php" class="w-full text-end text-primary">Giriş Yap</a>

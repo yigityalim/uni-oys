@@ -10,6 +10,7 @@ interface SessionInterface
   public static function checkLogin(): void;
 }
 
+
 /**
  * Class Session
  */

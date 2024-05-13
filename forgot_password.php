@@ -49,6 +49,7 @@ if (Helpers::post('student_no') && Helpers::post('password')) {
             }
         }
     </script>
+    <script src="./js/app.js" defer async type="module"></script>
 </head>
 
 <body class="bg-[#E1E5E9] text-black min-h-dvh">
