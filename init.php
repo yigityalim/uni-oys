@@ -37,7 +37,7 @@ $db->query(
   <title>init</title>
 </head>
 <body>
-  <h1>Veritabanı başarıyla oluşturuldu.</hh1>
+  <h1>Veritabanı başarıyla oluşturuldu.</h1>
   <a href="index.php">Anasayfa</a>
 </body>
 </html>
