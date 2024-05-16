@@ -1,3 +1,5 @@
+import "../public/bootstrap.min.js";
+
 if (!navigator.onLine) {
   alert("Internet bağlantınız yok. Lütfen internet bağlantınızı kontrol edin.");
 }

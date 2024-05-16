@@ -1,13 +1,12 @@
 <?php
-require 'Session.php';
-require 'Helpers.php';
+session_start();
+print_r($_SESSION);
 require 'db.php';
-$user = Session::get('user');
+$user = $_SESSION['user'];
 
 $db = new Database();
 $students = $db->from('students')->all();
 $lessons = $db->from('lessons')->where('id', $user['id'])->all();
-
 
 $categories = [
     'Fakülteler' => [
@@ -157,7 +156,7 @@ $categories = [
                         </script>
                         <li>
                             <a onclick="document.getElementById('menu-<?= $key ?>').classList.toggle('hidden'); document.getElementById('dropdown-icon-<?= $key ?>').classList.toggle('rotate-90');" class=" text-blue-500 font-bold text-sm inline-flex gap-2">
-                                <svg class="transition duration-300" id="dropdown-icon-<?= $key ?>" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right">
+                                <svg class="cursor-pointer transition duration-300" id="dropdown-icon-<?= $key ?>" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right">
                                     <path d="M5 12h14" />
                                     <path d="m12 5 7 7-7 7" />
                                 </svg>
@@ -191,8 +190,8 @@ $categories = [
                         </li>
                     <?php endforeach; ?>
                 </ul>
-                <form class="flex flex-row items-center justify-start p-2 rounded-md mt-4" action="search.php" method="GET">
-                    <input type="text" class="p-2 bg-zinc-100" placeholder="Ara...">
+                <form class="flex flex-row items-center justify-start p-2 rounded-md mt-4" action="search-lesson.php" method="GET">
+                    <input type="text" class="p-2 bg-zinc-100" placeholder="Ara..." name="q">
                     <button type="submit" class="rounded-r-md bg-blue-500 text-white font-bold text-sm p-2 flex gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search">
                             <circle cx="11" cy="11" r="8" />

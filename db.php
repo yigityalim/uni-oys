@@ -1,18 +1,5 @@
 <?php
 
-/**
- * Class BasicDB
- *
- * @author Tayfun Erbilen
- * @web http://www.erbilen.net
- * @mail tayfunerbilen@gmail.com
- * @web http://www.mtkocak.com
- * @mail mtkocak@gmail.com
- * @date 13 April 2014
- * @update 20 March 2019
- * @author Midori Koçak
- * @update 2 July 2015
- */
 class Database extends \PDO
 {
     private $dbName;
@@ -35,21 +22,21 @@ class Database extends \PDO
 
     public function __construct()
     {
-
-        if (file_exists('config.ini')) {
-            $config = parse_ini_file('config.ini');
-            $host = $config['host'];
-            $dbname = $config['schema'];
-            $username = $config['username'];
-            $password = $config['password'];
-            $charset = $config['charset'];
-        }
+        $ini = parse_ini_file('config.ini');
+        $config = [
+            'driver' => $ini['driver'],
+            'host' => $ini['host'],
+            'dbname' => $ini['dbname'],
+            'username' => $ini['username'],
+            'password' => $ini['password'],
+            'charset' => $ini['charset']
+        ];
 
         try {
-            parent::__construct('mysql:host=' . $host . ';dbname=' . $dbname, $username, $password);
-            $this->dbName = $dbname;
-            $this->query('SET CHARACTER SET ' . $charset);
-            $this->query('SET NAMES ' . $charset);
+            parent::__construct("{$config['driver']}:host={$config['host']};dbname={$config['dbname']}", $config['username'], $config['password']);
+            $this->dbName = $config['dbname'];
+            $this->query('SET CHARACTER SET ' . $config['charset']);
+            $this->query('SET NAMES ' . $config['charset']);
             $this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
         } catch (PDOException $e) {
@@ -57,27 +44,27 @@ class Database extends \PDO
         }
     }
 
-    public function from($tableName)
+    public function from($tableName): static
     {
         $this->sql = 'SELECT * FROM ' . $tableName;
         $this->tableName = $tableName;
         return $this;
     }
 
-    public function select($columns)
+    public function select($columns): static
     {
         $this->sql = str_replace(' * ', ' ' . $columns . ' ', $this->sql);
         return $this;
     }
 
-    public function union()
+    public function union(): static
     {
         $this->type = 'union';
         $this->unionSql = $this->sql;
         return $this;
     }
 
-    public function group(Closure $fn)
+    public function group(Closure $fn): static
     {
         static $group_id = 0;
         $this->grouped = true;
@@ -87,7 +74,7 @@ class Database extends \PDO
         return $this;
     }
 
-    public function where($column, $value = '', $mark = '=', $logical = '&&')
+    public function where($column, $value = '', $mark = '=', $logical = '&&'): static
     {
         $this->where[] = [
             'column' => $column,

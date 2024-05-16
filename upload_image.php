@@ -1,6 +1,9 @@
 <?php
-
-Session::checkLogin();
+session_start();
+if (isset($_SESSION['user'])) {
+    header('Location: student.php');
+    exit;
+}
 
 function upload_image(): string
 {

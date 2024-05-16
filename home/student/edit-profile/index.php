@@ -1,24 +1,27 @@
 <?php
-include 'Session.php';
-include 'helpers.php';
-include 'db.php';
-
-Session::checkLogin();
+session_start();
+if (!isset($_SESSION['student'])) {
+    header('Location: /proje/login/student');
+    exit;
+}
+include '../../../db.php';
 
 $db = new Database();
 $error = null;
 
-if (Helpers::post('student_no') && Helpers::post('password')) {
-    $student_no = Helpers::post('student_no');
-    $password = Helpers::openssl_enc(Helpers::post('password'));
-    $user = $db
+if (isset($_POST['student_no']) && isset($_POST['password'])) {
+    $student_no = $_POST['student_no'];
+    $password = openssl_enc($_POST['password']);
+    $student = $db
         ->from('students')
         ->where('student_no', $student_no)
         ->where('password', $password)
         ->first();
 
-    if ($user) {
-        Session::set('user', $user, true);
+    if ($student) {
+        $_SESSION['student'] = $student;
+        header('Location: /proje/home/student');
+        exit;
     } else {
         $error = 'Kullanıcı adı veya şifre hatalı';
     }

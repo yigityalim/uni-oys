@@ -1,9 +1,13 @@
 <?php
-require 'Session.php';
+session_start();
+if (isset($_SESSION['user'])) {
+    header('Location: student.php');
+    exit;
+}
 require 'db.php';
-require 'Helpers.php';
+require 'helpers.php';
 
-$user = Session::get('user');
+$user = $_SESSION['user'];
 $db = new Database();
 
 $isUpdated = false;

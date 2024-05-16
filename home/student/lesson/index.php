@@ -1,15 +1,17 @@
 <?php
-require_once 'Helpers.php';
-require_once 'db.php';
-require_once 'Session.php';
-date_default_timezone_set('Europe/Istanbul');
+session_start();
+if (!isset($_SESSION['student'])) {
+    header('Location: /proje/login/student');
+    exit;
+}
+require '../../../db.php';
 $db = new Database();
 
-$user = Session::get('user');
+$user = $_SESSION['student'];
 $lessons = $db->from('lessons')->where('id', $user['id'])->all();
 
 $courses = $db->from('lessons')
-    ->where('code', Helpers::get('code'))
+    ->where('code', $_GET['code'])
     ->first();
 
 ?>
