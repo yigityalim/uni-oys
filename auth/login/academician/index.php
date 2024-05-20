@@ -3,20 +3,22 @@ session_start();
 if (isset($_SESSION['academician'])) {
     header('Location: /proje/home/academician');
 }
-include '../../db.php';
-include '../../constants.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/db.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/constants.php';
 
 $db = new Database();
 $error = null;
 
-$academicians = $db->from('academicians')->select('id, name, password')->all();
+echo openssl_enc('123');
+
+$academicians = $db->from('lecturers')->select('id, name, password')->all();
 
 if (isset($_POST['academician_id'], $_POST['password'])) {
     $academician_id = $_POST['academician_id'];
     $password = openssl_enc($_POST['password']);
 
     $academician = $db
-        ->from('academicians')
+        ->from('lecturers')
         ->where('id', $academician_id)
         ->where('password', $password)
         ->first();

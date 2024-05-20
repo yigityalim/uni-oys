@@ -498,9 +498,24 @@ class Database extends \PDO
      * @param $tableName
      * @return mixed
      */
-    public function setAutoIncrement($tableName, $ai = 1)
+    public function setAutoIncrement($tableName, $ai = 1): mixed
     {
         return $this->query("ALTER TABLE `{$tableName}` AUTO_INCREMENT = {$ai}")->fetch();
     }
 
+    public function distinct(): static
+    {
+        $this->sql = str_replace('SELECT', 'SELECT DISTINCT', $this->sql);
+        return $this;
+    }
+
+    public function __destruct()
+    {
+        $this->disconnect();
+    }
+
+    public function disconnect(): void
+    {
+        $this->sql = null;
+    }
 }

@@ -1,125 +1,195 @@
 <?php
 session_start();
-if (isset($_SESSION['user'])) {
-    header('Location: student.php');
-    exit;
+if (!isset($_SESSION['student'])) {
+    header('location: /proje/login/student');
 }
-require 'db.php';
-require 'helpers.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/db.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/constants.php';
 
-$user = $_SESSION['user'];
 $db = new Database();
 
-$isUpdated = false;
+$student = $_SESSION['student'];
+$season_id = $_GET['season'] ?? SEASON;
 
-if (isset($_FILES['image'])) :
-  $image = Helpers::upload_image($_FILES['image']);
-  $db
-    ->update('students')
-    ->where('id', $user['id'])
-    ->set(['image_url' => $image]);
-  $user = $db->from('students')->where('id', $user['id'])->first();
-  Session::set('user', $user, false);
-  $isUpdated = true;
-endif;
-
-if (Helpers::isPost()) :
-  if (Helpers::post('password')) :
-    $password = Helpers::openssl_enc(Helpers::post('password'));
-    $db
-      ->update('students')
-      ->where('id', $user['id'])
-      ->set([
-        'name' => Helpers::post('name'),
-        'email' => Helpers::post('email'),
-        'password' => $password
-      ]);
-    $user = $db->from('students')->where('id', $user['id'])->first();
-    Session::set('user', $user, false);
-    $isUpdated = true;
-  endif;
-endif;
+$seasons = $db->from('courses')->select('season')->where('department_id', $student['department_id'])->distinct()->all();
+$courses = $db->from('courses')->where('season', $season_id)->where('department_id', $student['department_id'])->all();
+$faculties = $db->from('faculties')->all();
+$departments = $db->from('departments')->all();
+$advisors = $db->from('lecturers')->where('department_id', $student['department_id'])->all();
 ?>
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Paket Üni | Profil</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="./js/app.js" defer async type="module"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="/proje/public/bootstrap.min.css" rel="stylesheet">
+    <script src="/proje/public/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+          integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <title>ÖYS | Öğrenci</title>
 </head>
-
-<body class="pb-12 bg-white text-black flex flex-col min-h-dvh items-center justify-start">
-  <header class="w-full p-4 flex flex-row items-center justify-between">
-    <a class="w-1/4" href="index.php"><img src="https://oys2.baskent.edu.tr/pluginfile.php/1/core_admin/logo/0x200/1709033358/oys_banner.jpg" alt="Paket Üni"></a>
+<body class="bg-light">
+<header class="navbar justify-content-start fixed-top bg-white shadow-sm px-3 py-0">
+    <a href="/proje/home/student" class="navbar-brand d-flex align-items-center m-1">
+        <img width="50"
+             src="https://oys2.baskent.edu.tr/pluginfile.php/1/core_admin/logocompact/300x300/1709033358/kucuk.PNG"
+             class="logo mr-1" alt="ÖYS">
+    </a>
     <nav>
-      <ul class="hidden md:flex flex-row items-center justify-center gap-x-4 *:text-black">
-        <li><a href="index.php">Anasayfa</a></li>
-        <li><a href="courses.php">Dersler</a></li>
-        <li><a href="students.php">Öğrenciler</a></li>
-        <li class="relative">
-          <button id="toggleBtn" class="md:flex flex-row items-center justify-center gap-x-4">
-            <span><?= $user['name'] ?></span>
-            <span class="w-8 h-8 rounded-full bg-black"></span>
-          </button>
-          <div id="menu" class="hidden absolute top-10 right-0 bg-zinc-100 text-black px-2 py-1 rounded flex flex-col items-end justify-center *:px-4 *:py-1 *:w-full *:text-end *:rounded">
-            <a class="hover:bg-z
-              inc-300" href="profile.php">Profil</a>
-            <a class="hover:bg-zinc-300" href="logout.php">Çıkış Yap</a>
-          </div>
-        </li>
-      </ul>
-      <span class="md:hidden">☰</span>
+        <ul class="nav">
+            <li class="nav-item">
+                <a class="nav-link text-black" href="/proje/home/student/index.php">Anasayfa</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-black" href="/proje/home/student/courses/">Dersler</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-black" href="/proje/home/student/grade">Başarı Notlarım</a>
+            <li><a class="dropdown-item" href="/proje/home/student/grade">Başarı Notlarım</a></li>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-black" href="/proje/home/student/academician">Akademisyen</a>
+            </li>
+        </ul>
     </nav>
-  </header>
-
-  <main class="w-full">
-    <?php if ($isUpdated) : ?>
-      <div class="my-10 mx-auto w-full max-w-md bg-green-100 text-green-700 p-4 text-center">Bilgileriniz başarıyla güncellendi.</div>
-    <?php endif; ?>
-    <form action="<?= $_SERVER['PHP_SELF'] ?>" method="post" class="w-full flex flex-col items-center justify-center gap-y-4" enctype="multipart/form-data">
-      <div class="max-w-4xl w-full flex flex-col items-center justify-center gap-y-4">
-        <div class="relative overflow-hidden w-1/2 flex flex-row items-center justify-between gap-x-4">
-          <div class="flex flex-col items-center justify-center gap-y-4">
-            <img id="display_image" src="<?= $user['image_url'] ?>" alt="<?= $user['name'] ?>" class="rounded-full">
-            <label for="image_upload" class="bg-gray-200 text-sm text-center px-2 py-1 rounded cursor-pointer">Değiştir</label>
-          </div>
-          <div class="w-3/4 flex flex-col items-end justify-center gap-y-4">
-            <h1 class="text-4xl font-bold truncate"><?= $user['name'] ?></h1>
-            <h2 class="text-xl font-semibold truncate"><?= $user['student_no'] ?></h2>
-          </div>
+    <div class="dropdown ms-auto">
+        <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <?= $student['name'] ?>
+            <img src="/proje/<?= $student['image_url'] ?>" width="30" class="ms-2 rounded-circle"
+                 alt="Avatar">
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="/proje/home/student/profile">Profil</a></li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" href="/proje/home/student/academician">Akademisyen</a></li>
+            <li>
+                <a class="dropdown-item" href="/proje/home/student/courses">Tüm Dersler</a>
+            </li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            <?php foreach ($seasons as $season): ?>
+                <li>
+                    <a class="dropdown-item <?= isset($_GET['season']) && $_GET['season'] === $season['season'] ? 'active' : '' ?>"
+                       href="/proje/home/student/index.php?season=<?= $season['season'] ?>"><?= $season['season'] ?></a>
+                </li>
+            <?php endforeach; ?>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item text-danger" href="/proje/logout/student.php">Çıkış Yap</a></li>
+        </ul>
+    </div>
+</header>
+<main class="container-fluid mb-5" style="margin-top: 56px;">
+    <header class="row">
+        <div class="col-12 py-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex gap-3 align-items-center mb-3">
+                        <img src="/proje/<?= $student['image_url'] ?>" class="rounded-circle" width="100" alt="Profil Resmi">
+                        <div class="d-flex flex-column justify-content-center align-items-start">
+                            <h1 class="fw-bold"><?= $student['name'] ?> <?= $student['surname'] ?></h1>
+                            <p class="text-muted mb-0"><?= $student['student_no'] ?></p>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap">
+                        <nav>
+                            <ul class="breadcrumb">
+                                <li class="breadcrumb-item">
+                                    <a href="/proje/home/student" class="text-decoration-none">Ana sayfa</a>
+                                </li>
+                                <li class="breadcrumb-item">
+                                    <a href="/proje/home/student/profile" class="text-decoration-none">Profil</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
         </div>
-        <label for="image_upload" class="w-1/2 bg-gray-200 text-center p-4 rounded cursor-pointer <?= isset($user['image_url']) ? 'hidden' : '' ?>">Resim Yükle</label>
-        <input type="file" id="image_upload" name="image" class="hidden">
-        <div class="w-full flex flex-col items-center justify-center gap-y-4">
-          <label for="name" class="w-1/2 text-start">Ad Soyad</label>
-          <input type="text" id="name" name="name" value="<?= $user['name'] ?>" class="w-1/2 p-2 border border-black rounded">
+    </header>
+    <section>
+        <div class="row gx-3">
+            <div class="col-2">
+                <div class="p-3 border bg-light rounded-3">
+                    <h5 class="fw-light">Gezinme</h5>
+                    <ul class="nav flex-column">
+                        <?php foreach ($courses as $course): ?>
+                            <li class="nav-item">
+                                <a class="nav-link text-primary"
+                                   href="/proje/home/student/courses/index.php?code=<?= $course['code'] ?>">
+                                    <?= $course['code'] ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-10">
+                <div class="p-3 border bg-light rounded-3">
+                    <form action="/proje/home/student/profile/update.php" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Ad Soyad</label>
+                            <input type="text" class="form-control" id="name" name="name" value="<?= $student['name'] ?>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">E-posta</label>
+                            <input type="email" class="form-control" id="email" name="email" value="<?= $student['email'] ?>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="department" class="form-label">Bölüm</label>
+                            <select class="form-select" id="department" name="department_id">
+                                <?php foreach ($departments as $department): ?>
+                                    <option value="<?= $department['id'] ?>" <?= $department['id'] === $student['department_id'] ? 'selected' : '' ?>>
+                                        <?= $department['name'] ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="faculty" class="form-label">Fakülte</label>
+                            <select class="form-select" id="faculty" name="faculty_id">
+                                <?php foreach ($faculties as $faculty): ?>
+                                    <option value="<?= $faculty['id'] ?>" <?= $faculty['id'] === $student['department_id'] ? 'selected' : '' ?>>
+                                        <?= $faculty['name'] ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="student_no" class="form-label ">Öğrenci No</label>
+                            <input type="text" class="form-control" id="student_no" name="student_no" value="<?= $student['student_no'] ?>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Şifre</label>
+                            <input type="password" class="form-control" id="password" name="password">
+                        </div>
+                        <div class="mb-3">
+                            <label for="advisor" class="form-label">Danışman</label>
+                            <select class="form-select" id="advisor" name="advisor_id">
+                                <?php foreach ($advisors as $advisor): ?>
+                                    <option value="<?= $advisor['id'] ?>" <?= $advisor['id'] === $student['advisor_id'] ? 'selected' : '' ?>>
+                                        <?= $advisor['name'] ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="image" class="form-label">Profil Resmi</label>
+                            <input type="file" class="form-control" id="image" name="image">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Güncelle</button>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="w-full flex flex-col items-center justify-center gap-y-4">
-          <label for="email" class="w-1/2 text-start">E-posta</label>
-          <input type="email" id="email" name="email" value="<?= $user['email'] ?>" class="w-1/2 p-2 border border-black rounded">
-        </div>
-        <div class="w-full flex flex-col items-center justify-center gap-y-4">
-          <label for="password" class="w-1/2 text-start">Şifre</label>
-          <input type="password" id="password" name="password" class="w-1/2 p-2 border border-black rounded">
-        </div>
-        <div class="w-full flex flex-col items-center justify-center gap-y-4">
-          <button type="submit" class="btnnnn w-1/2 p-2 bg-black text-white rounded">Güncelle</button>
-        </div>
-      </div>
-    </form>
-  </main>
-
-  <footer></footer>
-
-  <script>
-    function toggleMenu() {
-      var menu = document.getElementById("menu");
-      menu.classList.toggle("hidden");
-    }
-  </script>
+    </section>
+</main>
 </body>
-
 </html>

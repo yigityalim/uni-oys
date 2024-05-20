@@ -4,15 +4,16 @@ if (isset($_SESSION['student'])) {
     header('Location: /proje/home/student');
     exit;
 }
-include '../../db.php';
-include '../../constants.php';
+
+require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/db.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/constants.php';
 
 $db = new Database();
 $error = null;
 
 $academicians = $db->from('academicians')->select('id, name, title')->all();
 
-if (isset($_POST['name'], $_POST['surname'], $_POST['student_no'], $_POST['mail'], $_POST['password'], $_POST['password_confirmation'], $_POST['faculty'], $_POST['department'], $_POST['academician'])) {
+if (isset($_POST['name'], $_POST['surname'], $_POST['student_no'], $_POST['mail'], $_POST['password'], $_POST['password_confirmation'], $_POST['faculty'], $_POST['department'], $_POST['akademisyen'])) {
     $name = $_POST['name'];
     $surname = $_POST['surname'];
     $student_no = $_POST['student_no'];
@@ -21,7 +22,7 @@ if (isset($_POST['name'], $_POST['surname'], $_POST['student_no'], $_POST['mail'
     $password_confirmation = openssl_enc($_POST['password_confirmation']);
     $faculty = $_POST['faculty'];
     $department = $_POST['department'];
-    $academician = $_POST['academician'];
+    $academician = $_POST['akademisyen'];
 
     echo "<h1>$academician</h1>";
 

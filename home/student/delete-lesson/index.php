@@ -3,7 +3,7 @@ session_start();
 if (!isset($_SESSION['student'])) {
     header('location: /proje/login/student');
 }
-require '../../../db.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/db.php';
 $db = new Database();
 
 $code = $_GET['code'];

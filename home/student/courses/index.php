@@ -1,20 +1,45 @@
 <?php
 session_start();
 if (!isset($_SESSION['student'])) {
-    header('location: /proje/auth/login/student');
+    header('location: /proje/login/student');
 }
 require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/db.php';
 require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/constants.php';
 
 $db = new Database();
+$error = false;
 
 $student = $_SESSION['student'];
-$season_id = $_GET['season'] ?? SEASON;
+$season_id = SEASON;
+$course = null;
 
 $seasons = $db->from('courses')->select('season')->where('department_id', $student['department_id'])->distinct()->all();
 $courses = $db->from('courses')->where('season', $season_id)->where('department_id', $student['department_id'])->all();
-$faculties = $db->from('faculties')->all();
-$departments = $db->from('departments')->all();
+if (isset($_GET['code'])) {
+    $course = $db->from('courses')->where('code', $_GET['code'])->first();
+}
+if (!$course) {
+    $error = true;
+}
+
+$dates = [
+    'Genel',
+    '12 Şubat - 18 Şubat',
+    '19 Şubat - 25 Şubat',
+    '26 Şubat - 3 Mart',
+    '4 Mart - 10 Mart',
+    '11 Mart - 17 Mart',
+    '18 Mart - 24 Mart',
+    '25 Mart - 31 Mart',
+    '1 Nisan - 7 Nisan',
+    '8 Nisan - 14 Nisan',
+    '15 Nisan - 21 Nisan',
+    '22 Nisan - 28 Nisan',
+    '29 Nisan - 5 Mayıs',
+    '6 Mayıs - 12 Mayıs',
+    '13 Mayıs - 19 Mayıs',
+];
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -92,7 +117,14 @@ $departments = $db->from('departments')->all();
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="d-flex w-100 justify-content-between">
-                            <h1 class="fw-light">Öğretim Yönetim Sistemi</h1>
+                            <h1 class="fw-light">
+                                <?php if ($course): ?>
+                                    <?= $course['code'] ?>
+                                    <?= $course['name'] ?>
+                                <?php else: ?>
+                                    Tüm Dersler
+                                <?php endif; ?>
+                            </h1>
                             <div class="d-flex flex-column justify-content-center align-items-end">
                                 <p class="text-muted mb-0"><?= date('d.m.Y') ?></p>
                                 <p class="text-muted mb-0"><?= $season_id ?></p>
@@ -105,6 +137,19 @@ $departments = $db->from('departments')->all();
                                 <li class="breadcrumb-item">
                                     <a href="/proje/home/student" class="text-decoration-none">Ana sayfa</a>
                                 </li>
+                                <li class="breadcrumb-item">
+                                    <a href="/proje/home/student/courses/" class="text-decoration-none">Dersler</a>
+                                </li>
+                                <?php if ($course): ?>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        <?= $course['name'] ?>
+                                    </li>
+                                <?php else: ?>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        Ders içeriği
+                                    </li>
+                                <?php endif; ?>
+
                             </ul>
                         </nav>
                     </div>
@@ -113,7 +158,7 @@ $departments = $db->from('departments')->all();
         </div>
         <h1 class="text-start fs-3 mb-3 mt-2">Hoşgeldin, <?= $student['name'] ?>!</h1>
     </header>
-    <section>
+    <section class="mb-5 ">
         <div class="row gx-3">
             <div class="col-2">
                 <div class="p-3 border bg-light rounded-3">
@@ -129,61 +174,50 @@ $departments = $db->from('departments')->all();
                         <?php endforeach; ?>
                     </ul>
                 </div>
+                <?php if (isset($_GET['code'])): ?>
+                    <div class="p-3 border bg-light rounded-3 mt-3">
+                        <h5 class="fw-light">Ders Yönetimi</h5>
+                        <a href="/proje/home/student/courses/delete.php?code=<?= $course['code'] ?>"
+                           class="btn btn-primary w-100">Dersi Kaldır</a>
+                    </div>
+                <?php endif; ?>
             </div>
             <div class="col-10">
                 <div class="p-3 border bg-light rounded-3">
-                    <div class="mb-4 d-flex justify-content-between align-items-center">
-                        <h1 class="fw-light fs-3">Ders Kategorileri</h1>
-                        <a data-bs-toggle="collapse" data-bs-target=".multi-collapse" class="btn btn-primary">
-                            Hepsini Görüntüle
-                        </a>
-                    </div>
-                    <form action="/proje/home/student/index.php" method="get" class="mb-4">
-                        <div class="input-group">
-                            <select class="form-select" name="season" id="season">
-                                <?php foreach ($seasons as $season): ?>
-                                    <option value="<?= $season['season'] ?>"
-                                        <?= $season['season'] === $season_id ? 'selected' : '' ?>>
-                                        <?= $season['season'] ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <button class="btn btn-primary" type="submit">Filtrele</button>
-                        </div>
-                    </form>
-                    <ul class="list-group list-group-flush">
-                        <?php foreach ($faculties as $faculty): ?>
-                            <li class="list-group list-group-item mb-1 rounded">
-                                <a onclick="this.querySelector('i').classList.toggle('fa-chevron-down');this.querySelector('i').classList.toggle('fa-chevron-up');"
-                                   data-bs-toggle="collapse" href="#collapse_course_<?= $faculty['id'] ?>"
-                                   href="/proje/home/student/faculties/index.php?id=<?= $faculty['id'] ?>"
-                                   class="w-100 d-inline-flex justify-content-between align-items-center text-decoration-none text-dark">
-                                    <?= $faculty['name'] ?>
-                                    <i class="fa-solid fa-chevron-down"></i>
+                    <?php if (!$error && isset($_GET['code'])): ?>
+                        <div class="d-flex flex-column gap-3 align-items-start justify-content-center">
+                            <?php foreach ($dates as $index => $week) : ?>
+                                <a
+                                        data-bs-toggle="collapse"
+                                        href="#collapse-<?= $index ?>"
+                                        class="text-black text-decoration-none border-bottom w-100 p-3 d-flex gap-3 align-items-center justify-content-start"
+                                        style="<?= (getMatchingDateRange($week)) ? 'border-left: 5px solid #0d6efd;' : ''; ?>">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                    <h4 class="fw-light mb-0"><?= htmlspecialchars($week, ENT_QUOTES, 'UTF-8'); ?></h4>
+                                    <?php if (getMatchingDateRange($week)): ?>
+                                        <span class="badge bg-primary">Bu Hafta</span>
+                                    <?php endif; ?>
                                 </a>
-                                <div class="collapse multi-collapse" id="collapse_course_<?= $faculty['id'] ?>">
-                                    <ul class="list-group list-group-flush">
-                                        <?php foreach (
-                                            $db->from('courses')->where(
-                                                'season', $season_id
-                                            )->where(
-                                                'department_id', $faculty['id']
-                                            )->all() as $faculty_course
-                                        ): ?>
-                                            <?php if ($faculty_course['department_id'] === $faculty['id']): ?>
-                                                <li class="list-group list-group-item mb-1 rounded">
-                                                    <a href="/proje/home/student/courses/index.php?code=<?= $faculty_course['code'] ?>"
-                                                       class="text-decoration-none text-dark">
-                                                        <?= $faculty_course['name'] ?>
-                                                    </a>
-                                                </li>
-                                            <?php endif; ?>
-                                        <?php endforeach; ?>
-                                    </ul>
+                                <div class="collapse" id="collapse-<?= $index ?>">
+                                    <div class="card card-body">
+                                        Some placeholder content for the collapse component. This panel is hidden by
+                                        default but revealed when the user activates the relevant trigger.
+                                    </div>
                                 </div>
-                            </li>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($courses as $course): ?>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title"><?= $course['name'] ?></h5>
+                                    <p class="card-text"><?= $course['code'] ?></p>
+                                    <a href="/proje/home/student/courses/index.php?code=<?= $course['code'] ?>"
+                                       class="btn btn-primary">Ders içeriğine git</a>
+                                </div>
+                            </div>
                         <?php endforeach; ?>
-                    </ul>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

@@ -5,8 +5,8 @@ if (isset($_SESSION['student'])) {
     exit;
 }
 
-include '../../db.php';
-include '../../constants.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/db.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/constants.php';
 
 $db = new Database();
 $error = null;

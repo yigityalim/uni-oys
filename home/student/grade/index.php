@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['student'])) {
-    header('location: /proje/auth/login/student');
+    header('location: /proje/login/student');
 }
 require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/db.php';
 require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/constants.php';
@@ -15,6 +15,17 @@ $seasons = $db->from('courses')->select('season')->where('department_id', $stude
 $courses = $db->from('courses')->where('season', $season_id)->where('department_id', $student['department_id'])->all();
 $faculties = $db->from('faculties')->all();
 $departments = $db->from('departments')->all();
+$advisors = $db->from('lecturers')->where('department_id', $student['department_id'])->all();
+
+$student_courses = $db->from('student_courses')
+    ->select('courses.code, courses.name, lecturers.name as lecturer_name, student_courses.grade')
+    ->join('courses', 'courses.id = student_courses.course_id')
+    ->join('lecturers', 'lecturers.id = courses.lecturer_id')
+    ->join('students', 'students.id = student_courses.student_id')
+    ->where('student_courses.student_id', $student['id'])
+    ->all();
+
+$db->disconnect();
 ?>
 <!doctype html>
 <html lang="en">
@@ -85,18 +96,17 @@ $departments = $db->from('departments')->all();
         </ul>
     </div>
 </header>
-<main class="container-fluid" style="margin-top: 56px;">
+<main class="container-fluid mb-5" style="margin-top: 56px;">
     <header class="row">
         <div class="col-12 py-3">
             <div class="card">
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h1 class="fw-light">Öğretim Yönetim Sistemi</h1>
-                            <div class="d-flex flex-column justify-content-center align-items-end">
-                                <p class="text-muted mb-0"><?= date('d.m.Y') ?></p>
-                                <p class="text-muted mb-0"><?= $season_id ?></p>
-                            </div>
+                    <div class="d-flex gap-3 align-items-center mb-3">
+                        <img src="/proje/<?= $student['image_url'] ?>" class="rounded-circle" width="100"
+                             alt="Profil Resmi">
+                        <div class="d-flex flex-column justify-content-center align-items-start">
+                            <h1 class="fw-bold"><?= $student['name'] ?> <?= $student['surname'] ?></h1>
+                            <p class="text-muted mb-0"><?= $student['student_no'] ?></p>
                         </div>
                     </div>
                     <div class="d-flex flex-wrap">
@@ -105,13 +115,15 @@ $departments = $db->from('departments')->all();
                                 <li class="breadcrumb-item">
                                     <a href="/proje/home/student" class="text-decoration-none">Ana sayfa</a>
                                 </li>
+                                <li class="breadcrumb-item">
+                                    <a href="/proje/home/student/profile" class="text-decoration-none">Profil</a>
+                                </li>
                             </ul>
                         </nav>
                     </div>
                 </div>
             </div>
         </div>
-        <h1 class="text-start fs-3 mb-3 mt-2">Hoşgeldin, <?= $student['name'] ?>!</h1>
     </header>
     <section>
         <div class="row gx-3">
@@ -132,58 +144,38 @@ $departments = $db->from('departments')->all();
             </div>
             <div class="col-10">
                 <div class="p-3 border bg-light rounded-3">
-                    <div class="mb-4 d-flex justify-content-between align-items-center">
-                        <h1 class="fw-light fs-3">Ders Kategorileri</h1>
-                        <a data-bs-toggle="collapse" data-bs-target=".multi-collapse" class="btn btn-primary">
-                            Hepsini Görüntüle
-                        </a>
-                    </div>
-                    <form action="/proje/home/student/index.php" method="get" class="mb-4">
-                        <div class="input-group">
-                            <select class="form-select" name="season" id="season">
-                                <?php foreach ($seasons as $season): ?>
-                                    <option value="<?= $season['season'] ?>"
-                                        <?= $season['season'] === $season_id ? 'selected' : '' ?>>
-                                        <?= $season['season'] ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <button class="btn btn-primary" type="submit">Filtrele</button>
-                        </div>
-                    </form>
-                    <ul class="list-group list-group-flush">
-                        <?php foreach ($faculties as $faculty): ?>
-                            <li class="list-group list-group-item mb-1 rounded">
-                                <a onclick="this.querySelector('i').classList.toggle('fa-chevron-down');this.querySelector('i').classList.toggle('fa-chevron-up');"
-                                   data-bs-toggle="collapse" href="#collapse_course_<?= $faculty['id'] ?>"
-                                   href="/proje/home/student/faculties/index.php?id=<?= $faculty['id'] ?>"
-                                   class="w-100 d-inline-flex justify-content-between align-items-center text-decoration-none text-dark">
-                                    <?= $faculty['name'] ?>
-                                    <i class="fa-solid fa-chevron-down"></i>
-                                </a>
-                                <div class="collapse multi-collapse" id="collapse_course_<?= $faculty['id'] ?>">
-                                    <ul class="list-group list-group-flush">
-                                        <?php foreach (
-                                            $db->from('courses')->where(
-                                                'season', $season_id
-                                            )->where(
-                                                'department_id', $faculty['id']
-                                            )->all() as $faculty_course
-                                        ): ?>
-                                            <?php if ($faculty_course['department_id'] === $faculty['id']): ?>
-                                                <li class="list-group list-group-item mb-1 rounded">
-                                                    <a href="/proje/home/student/courses/index.php?code=<?= $faculty_course['code'] ?>"
-                                                       class="text-decoration-none text-dark">
-                                                        <?= $faculty_course['name'] ?>
-                                                    </a>
-                                                </li>
-                                            <?php endif; ?>
-                                        <?php endforeach; ?>
-                                    </ul>
-                                </div>
-                            </li>
+                    <h2 class="fw-normal">Aldığım Dersler</h2>
+                    <table class="table table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th>Ders Kodu</th>
+                            <th>Ders Adı</th>
+                            <th>Öğretim Görevlisi</th>
+                            <th>Sezon</th>
+                            <th>Not</th>
+                            <th>İşlem</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($student_courses as $student_course): ?>
+                            <tr>
+                                <td><?= $student_course['code'] ?></td>
+                                <td><?= $student_course['name'] ?></td>
+                                <td><?= $student_course['lecturer_name'] ?></td>
+                                <td><?= $season_id ?></td>
+                                <td><?= $student_course['grade'] ?></td>
+                                <td>
+                                    <form action="/proje/home/student/grade/update.php" method="post" class="d-flex gap-2">
+                                        <input type="hidden" name="student_id" value="<?= $student['id'] ?>">
+                                        <input type="hidden" name="course_code" value="<?= $student_course['code'] ?>">
+                                        <input type="hidden" name="season" value="<?= $season_id ?>">
+                                        <button type="submit" class="btn btn-danger">Sil</button>
+                                    </form>
+                                </td>
+                            </tr>
                         <?php endforeach; ?>
-                    </ul>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

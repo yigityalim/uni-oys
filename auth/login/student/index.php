@@ -3,15 +3,16 @@ session_start();
 if (isset($_SESSION['student'])) {
     header('Location: /proje/home/student');
 }
-include '../../db.php';
-include '../../constants.php';
+
+require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/db.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/constants.php';
 
 $db = new Database();
 $error = null;
 
 if (isset($_POST['student_no'], $_POST['password'])) {
     $student_no = $_POST['student_no'];
-    $password = openssl_enc($_POST['password']);
+    $password = $_POST['password'];
 
 
     $user = $db
@@ -66,9 +67,9 @@ if (isset($_POST['student_no'], $_POST['password'])) {
                         </div>
                         <button type="submit" class="w-100 btn btn-primary btn-block">Giriş yap</button>
                         <div class="d-flex justify-content-between mt-3">
-                            <a href="/proje/forgot-password/student" class="text-primary text-decoration-none">Şifrenizi mi unuttunuz?</a>
-                            <a href="/proje/login/academician" class="text-secondary text-decoration-none">Akademisyen girişi</a>
-                            <a href="/proje/register/student" class="text-primary text-decoration-none">Kayıt ol</a>
+                            <a href="/proje/auth/forgot-password/student" class="text-primary text-decoration-none">Şifrenizi mi unuttunuz?</a>
+                            <a href="/proje/auth/login/academician" class="text-secondary text-decoration-none">Akademisyen girişi</a>
+                            <a href="/proje/auth/register/student" class="text-primary text-decoration-none">Kayıt ol</a>
                         </div>
                     </form>
                 </div>
