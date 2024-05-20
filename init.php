@@ -13,10 +13,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'):
     try {
         $db = new mysqli($server, $username, $password);
 
-        if ($db->connect_error) throw new Exception('Bağlantı hatası: ' . $db->connect_error);
+        if ($db->connect_error) throw;
 
         $db->query("CREATE DATABASE IF NOT EXISTS $database");
         $db->select_db($database);
+        $db->set_charset('utf8');
 
         $message = "
         <b class='text-primary'>Veritabanı bilgileri:</b><br>

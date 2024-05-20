@@ -81,7 +81,7 @@ $departments = $db->from('departments')->all();
             <li>
                 <hr class="dropdown-divider">
             </li>
-            <li><a class="dropdown-item text-danger" href="/proje/logout/student.php">Çıkış Yap</a></li>
+            <li><a class="dropdown-item text-danger" href="/proje/auth/logout/student.php">Çıkış Yap</a></li>
         </ul>
     </div>
 </header>

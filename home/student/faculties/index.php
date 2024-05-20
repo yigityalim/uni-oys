@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['student'])) {
-    header('location: /proje/login/student');
+    header('location: /proje/auth/login/student');
 }
 require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/db.php';
 require $_SERVER['DOCUMENT_ROOT'] . '/proje'. '/constants.php';
@@ -79,7 +79,7 @@ $courses = $db->from('courses')->where('department_id', $faculty['id'])->all();
             <li>
                 <hr class="dropdown-divider">
             </li>
-            <li><a class="dropdown-item text-danger" href="/proje/logout/student.php">Çıkış Yap</a></li>
+            <li><a class="dropdown-item text-danger" href="/proje/auth/logout/student.php">Çıkış Yap</a></li>
         </ul>
     </div>
 </header>

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['student'])) {
-    header('location: /proje/login/student');
+    header('location: /proje/auth/login/student');
 }
 require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/db.php';
 require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/constants.php';
