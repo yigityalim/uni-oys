@@ -1,7 +1,7 @@
 <?php
 session_start();
-if (isset($_SESSION['user'])) {
-    header('Location: student.php');
+if (isset($_SESSION['student'])) {
+    header('Location: /proje/home/');
     exit;
 }
 

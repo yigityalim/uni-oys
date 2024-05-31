@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (isset($_SESSION['student'])) {
-    header('Location: /proje/home/student');
+    header('Location: /proje/home');
 }
 
 require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/db.php';
@@ -10,24 +10,22 @@ require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/constants.php';
 $db = new Database();
 $error = null;
 
-if (isset($_POST['student_no'], $_POST['password'])) {
+if (isset($_POST['student_no'], $_POST['password'])) :
     $student_no = $_POST['student_no'];
     $password = $_POST['password'];
-
-
-    $user = $db
-        ->from('students')
+    $user = $db->from('students')
         ->where('student_no', $student_no)
-        ->where('password', $password)
+        ->where('password', openssl_enc($password))
         ->first();
 
-    if ($user) {
+    if ($user) :
         $_SESSION['student'] = $user;
-        header('Location: /proje/home/student');
-    } else {
+        header('Location: /proje/home');
+        exit;
+    else :
         $error = 'Kullanıcı adı veya şifre hatalı';
-    }
-}
+    endif;
+endif;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -37,8 +35,8 @@ if (isset($_POST['student_no'], $_POST['password'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paket Üni | Giriş Yap</title>
     <link href="/proje/public/bootstrap.min.css" rel="stylesheet">
-    <script src="/js/app.js" defer async type="module"></script>
 </head>
+
 <body class="bg-light">
 
 <div class="container mt-5">
@@ -50,8 +48,7 @@ if (isset($_POST['student_no'], $_POST['password'])) {
                         <img src="https://oys2.baskent.edu.tr/pluginfile.php/1/core_admin/logo/0x200/1709033358/oys_banner.jpg"
                              alt="Baskent University" class="img-fluid">
                     </div>
-                    <?php if ($error): ?>
-
+                    <?php if ($error) : ?>
                         <div class="alert alert-danger" role="alert">
                             <?= $error; ?>
                         </div>
@@ -67,18 +64,15 @@ if (isset($_POST['student_no'], $_POST['password'])) {
                         </div>
                         <button type="submit" class="w-100 btn btn-primary btn-block">Giriş yap</button>
                         <div class="d-flex justify-content-between mt-3">
-                            <a href="/proje/auth/forgot-password/student" class="text-primary text-decoration-none">Şifrenizi mi unuttunuz?</a>
-                            <a href="/proje/auth/login/academician" class="text-secondary text-decoration-none">Akademisyen girişi</a>
-                            <a href="/proje/auth/register/student" class="text-primary text-decoration-none">Kayıt ol</a>
+                            <a href="/proje/auth/forgot-password" class="text-primary text-decoration-none">Şifrenizi mi
+                                unuttunuz?</a>
+                            <a href="/proje/auth/register" class="text-primary text-decoration-none">Kayıt ol</a>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+
 </html>

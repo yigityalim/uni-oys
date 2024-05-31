@@ -1,14 +1,14 @@
 <?php
 session_start();
 if (!isset($_SESSION['student'])) {
-    header('location: /proje/auth/login/student');
+    header('location: /proje/auth/login');
 }
 require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/db.php';
 require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/constants.php';
 
 $db = new Database();
 $error = false;
-
+$path = rtrim($_SERVER['PHP_SELF'], '/');
 $student = $_SESSION['student'];
 $season_id = SEASON;
 $course = null;
@@ -43,6 +43,7 @@ $dates = [
 ?>
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -55,6 +56,7 @@ $dates = [
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <title>ÖYS | Öğrenci</title>
 </head>
+
 <body class="bg-light">
 <header class="navbar justify-content-start fixed-top bg-white shadow-sm px-3 py-0">
     <a href="/proje/home/student" class="navbar-brand d-flex align-items-center m-1">
@@ -65,48 +67,47 @@ $dates = [
     <nav>
         <ul class="nav">
             <li class="nav-item">
-                <a class="nav-link text-black" href="/proje/home/student/index.php">Anasayfa</a>
+                <a class="nav-link text-black" href="/proje/home">Anasayfa</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-black" href="/proje/home/student/courses/">Dersler</a>
+                <a class="nav-link text-black" href="/proje/home/courses/">Dersler</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-black" href="/proje/home/student/grade">Başarı Notlarım</a>
+                <a class="nav-link text-black" href="/proje/home/grade">Başarı Notlarım</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-black" href="/proje/home/student/academician">Akademisyen</a>
+                <a class="nav-link text-black" href="/proje/home/academician">Akademisyen</a>
             </li>
         </ul>
     </nav>
     <div class="dropdown ms-auto">
         <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
             <?= $student['name'] ?>
-            <img src="/proje/<?= $student['image_url'] ?>" width="30" class="ms-2 rounded-circle"
-                 alt="Avatar">
+            <img src="/proje/<?= $student['image_url'] ?>" width="30" class="ms-2 rounded-circle" alt="Avatar">
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="/proje/home/student/profile">Profil</a></li>
+            <li><a class="dropdown-item" href="/proje/home/profile">Profil</a></li>
             <li>
                 <hr class="dropdown-divider">
             </li>
-            <li><a class="dropdown-item" href="/proje/home/student/academician">Akademisyen</a></li>
-            <li><a class="dropdown-item" href="/proje/home/student/grade">Başarı Notlarım</a></li>
+            <li><a class="dropdown-item" href="/proje/home/academician">Akademisyen</a></li>
+            <li><a class="dropdown-item" href="/proje/home/grade">Başarı Notlarım</a></li>
             <li>
-                <a class="dropdown-item" href="/proje/home/student/courses">Tüm Dersler</a>
+                <a class="dropdown-item" href="/proje/home/courses">Tüm Dersler</a>
             </li>
             <li>
                 <hr class="dropdown-divider">
             </li>
-            <?php foreach ($seasons as $season): ?>
+            <?php foreach ($seasons as $season) : ?>
                 <li>
                     <a class="dropdown-item <?= isset($_GET['season']) && $_GET['season'] === $season['season'] ? 'active' : '' ?>"
-                       href="/proje/home/student/index.php?season=<?= $season['season'] ?>"><?= $season['season'] ?></a>
+                       href="<?= $path ?>?season=<?= $season['season'] ?>"><?= $season['season'] ?></a>
                 </li>
             <?php endforeach; ?>
             <li>
                 <hr class="dropdown-divider">
             </li>
-            <li><a class="dropdown-item text-danger" href="/proje/auth/logout/student.php">Çıkış Yap</a></li>
+            <li><a class="dropdown-item text-danger" href="/proje/auth/logout">Çıkış Yap</a></li>
         </ul>
     </div>
 </header>
@@ -118,10 +119,10 @@ $dates = [
                     <div class="d-flex align-items-center">
                         <div class="d-flex w-100 justify-content-between">
                             <h1 class="fw-light">
-                                <?php if ($course): ?>
+                                <?php if ($course) : ?>
                                     <?= $course['code'] ?>
                                     <?= $course['name'] ?>
-                                <?php else: ?>
+                                <?php else : ?>
                                     Tüm Dersler
                                 <?php endif; ?>
                             </h1>
@@ -135,16 +136,16 @@ $dates = [
                         <nav>
                             <ul class="breadcrumb">
                                 <li class="breadcrumb-item">
-                                    <a href="/proje/home/student" class="text-decoration-none">Ana sayfa</a>
+                                    <a href="/proje/home" class="text-decoration-none">Ana sayfa</a>
                                 </li>
                                 <li class="breadcrumb-item">
-                                    <a href="/proje/home/student/courses/" class="text-decoration-none">Dersler</a>
+                                    <a href="/proje/home/courses/" class="text-decoration-none">Dersler</a>
                                 </li>
-                                <?php if ($course): ?>
+                                <?php if ($course) : ?>
                                     <li class="breadcrumb-item active" aria-current="page">
                                         <?= $course['name'] ?>
                                     </li>
-                                <?php else: ?>
+                                <?php else : ?>
                                     <li class="breadcrumb-item active" aria-current="page">
                                         Ders içeriği
                                     </li>
@@ -164,37 +165,37 @@ $dates = [
                 <div class="p-3 border bg-light rounded-3">
                     <h5 class="fw-light">Gezinme</h5>
                     <ul class="nav flex-column">
-                        <?php foreach ($courses as $course): ?>
+                        <?php foreach ($courses as $course) : ?>
                             <li class="nav-item">
                                 <a class="nav-link text-primary"
-                                   href="/proje/home/student/courses/index.php?code=<?= $course['code'] ?>">
+                                   href="/proje/home/courses/index.php?code=<?= $course['code'] ?>&season=<?= $season_id ?>">
                                     <?= $course['code'] ?>
                                 </a>
                             </li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
-                <?php if (isset($_GET['code'])): ?>
-                    <div class="p-3 border bg-light rounded-3 mt-3">
-                        <h5 class="fw-light">Ders Yönetimi</h5>
-                        <a href="/proje/home/student/courses/delete.php?code=<?= $course['code'] ?>"
-                           class="btn btn-primary w-100">Dersi Kaldır</a>
-                    </div>
+                <!--
+                    <?php if (isset($_GET['code'])) : ?>
+                        <div class="p-3 border bg-light rounded-3 mt-3">
+                            <h5 class="fw-light">Ders Yönetimi</h5>
+                                <a href="/proje/home/courses/delete.php?id=<?= $course['id'] ?>" class="btn btn-primary w-100">Dersi Kaldır</a>
+
+                        </div>
+                -->
                 <?php endif; ?>
             </div>
             <div class="col-10">
                 <div class="p-3 border bg-light rounded-3">
-                    <?php if (!$error && isset($_GET['code'])): ?>
+                    <?php if (!$error && isset($_GET['code'])) : ?>
                         <div class="d-flex flex-column gap-3 align-items-start justify-content-center">
                             <?php foreach ($dates as $index => $week) : ?>
-                                <a
-                                        data-bs-toggle="collapse"
-                                        href="#collapse-<?= $index ?>"
-                                        class="text-black text-decoration-none border-bottom w-100 p-3 d-flex gap-3 align-items-center justify-content-start"
-                                        style="<?= (getMatchingDateRange($week)) ? 'border-left: 5px solid #0d6efd;' : ''; ?>">
+                                <a data-bs-toggle="collapse" href="#collapse-<?= $index ?>"
+                                   class="text-black text-decoration-none border-bottom w-100 p-3 d-flex gap-3 align-items-center justify-content-start"
+                                   style="<?= (getMatchingDateRange($week)) ? 'border-left: 5px solid #0d6efd;' : ''; ?>">
                                     <i class="fa-solid fa-chevron-right"></i>
                                     <h4 class="fw-light mb-0"><?= htmlspecialchars($week, ENT_QUOTES, 'UTF-8'); ?></h4>
-                                    <?php if (getMatchingDateRange($week)): ?>
+                                    <?php if (getMatchingDateRange($week)) : ?>
                                         <span class="badge bg-primary">Bu Hafta</span>
                                     <?php endif; ?>
                                 </a>
@@ -206,13 +207,13 @@ $dates = [
                                 </div>
                             <?php endforeach; ?>
                         </div>
-                    <?php else: ?>
-                        <?php foreach ($courses as $course): ?>
+                    <?php else : ?>
+                        <?php foreach ($courses as $course) : ?>
                             <div class="card mb-3">
                                 <div class="card-body">
                                     <h5 class="card-title"><?= $course['name'] ?></h5>
                                     <p class="card-text"><?= $course['code'] ?></p>
-                                    <a href="/proje/home/student/courses/index.php?code=<?= $course['code'] ?>"
+                                    <a href="/proje/home/courses/index.php?code=<?= $course['code'] ?>"
                                        class="btn btn-primary">Ders içeriğine git</a>
                                 </div>
                             </div>
@@ -224,4 +225,5 @@ $dates = [
     </section>
 </main>
 </body>
+
 </html>

@@ -13,8 +13,9 @@ $season_id = $_GET['season'] ?? SEASON;
 
 $seasons = $db->from('courses')->select('season')->where('department_id', $student['department_id'])->distinct()->all();
 $courses = $db->from('courses')->where('season', $season_id)->where('department_id', $student['department_id'])->all();
-
-$academician = $db->from('lecturers')->where('id', $student['advisor_id'])->first();
+$faculties = $db->from('faculties')->all();
+$departments = $db->from('departments')->all();
+$advisors = $db->from('lecturers')->where('department_id', $student['department_id'])->all();
 ?>
 <!doctype html>
 <html lang="en">
@@ -61,7 +62,6 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
                     <hr class="dropdown-divider">
                 </li>
                 <li><a class="dropdown-item" href="/proje/home/academician">Akademisyen</a></li>
-                <li><a class="dropdown-item" href="/proje/home/grade">Başarı Notlarım</a></li>
                 <li>
                     <a class="dropdown-item" href="/proje/home/courses">Tüm Dersler</a>
                 </li>
@@ -70,7 +70,7 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
                 </li>
                 <?php foreach ($seasons as $season) : ?>
                     <li>
-                        <a class="dropdown-item <?= isset($_GET['season']) && $_GET['season'] === $season['season'] ? 'active' : '' ?>" href="/proje/home/index.php?season=<?= $season['season'] ?>"><?= $season['season'] ?></a>
+                        <a class="dropdown-item <?= isset($_GET['season']) && $_GET['season'] === $season['season'] ? 'active' : '' ?>" href="/proje/home/student/index.php?season=<?= $season['season'] ?>"><?= $season['season'] ?></a>
                     </li>
                 <?php endforeach; ?>
                 <li>
@@ -85,13 +85,11 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
             <div class="col-12 py-3">
                 <div class="card">
                     <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h1 class="fw-light">Akademisyen</h1>
-                                <div class="d-flex flex-column justify-content-center align-items-end">
-                                    <p class="text-muted mb-0"><?= date('d.m.Y') ?></p>
-                                    <p class="text-muted mb-0"><?= $season_id ?></p>
-                                </div>
+                        <div class="d-flex gap-3 align-items-center mb-3">
+                            <img src="/proje/<?= $student['image_url'] ?>" class="rounded-circle" width="100" alt="Profil Resmi">
+                            <div class="d-flex flex-column justify-content-center align-items-start">
+                                <h1 class="fw-bold"><?= $student['name'] ?> <?= $student['surname'] ?></h1>
+                                <p class="text-muted mb-0"><?= $student['student_no'] ?></p>
                             </div>
                         </div>
                         <div class="d-flex flex-wrap">
@@ -101,7 +99,7 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
                                         <a href="/proje/home" class="text-decoration-none">Ana sayfa</a>
                                     </li>
                                     <li class="breadcrumb-item">
-                                        <a href="/proje/home/academician" class="text-decoration-none">Akademisyen</a>
+                                        <a href="/proje/home/profile" class="text-decoration-none">Profil</a>
                                     </li>
                                 </ul>
                             </nav>
@@ -109,7 +107,6 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
                     </div>
                 </div>
             </div>
-            <h1 class="text-start fs-3 mb-3 mt-2">Merhaba, <?= $student['name'] ?>!</h1>
         </header>
         <section>
             <div class="row gx-3">
@@ -128,31 +125,63 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
                     </div>
                 </div>
                 <div class="col-10">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="d-flex gap-3 align-items-center mb-5 ">
-                                <img src="<?= $academician['image_url'] ?>" class="rounded-circle" width="100" alt="Profil Resmi" style="aspect-ratio: 1/1; object-fit: cover; object-position: top;">
-                                <div class="d-flex flex-column justify-content-center align-items-start">
-                                    <h1 class="fw-bold"><?= $academician['title'] ?> <?= $academician['name'] ?></h1>
-                                    <a href="tel:<?= $academician['phone'] ?>" class="card-text">
-                                        +90 <?= $academician['phone'] ?>
-                                    </a>
-                                </div>
+                    <div class="p-3 border bg-light rounded-3">
+                        <form action="/proje/home/profile/update.php" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Ad Soyad</label>
+                                <input type="text" class="form-control" id="name" name="name" value="<?= $student['name'] ?>">
                             </div>
-
-                            <div class="my-3">
-                                <label for="room" class="form-label">Oda Numarası</label>
-                                <input type="text" id="room" class="form-control" value="<?= $academician['room'] ?>" disabled>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">E-posta</label>
+                                <input type="email" class="form-control" id="email" name="email" value="<?= $student['email'] ?>">
                             </div>
-                            <form action="/proje/profile">
-                                <label for="message" class="form-label">Mesajınız</label>
-                                <textarea name="message" id="message" class="form-control" rows="5"></textarea>
-                                <button type="submit" class="mt-3 w-100 btn btn-primary">Gönder</button>
-                            </form>
-                            <a href="/proje/home/profile" class="mt-3 w-100 btn btn-danger">Hocayı Değiştir</a>
-                        </div>
+                            <div class="mb-3">
+                                <label for="department" class="form-label">Bölüm</label>
+                                <select class="form-select" id="department" name="department_id">
+                                    <?php foreach ($departments as $department) : ?>
+                                        <option value="<?= $department['id'] ?>" <?= $department['id'] === $student['department_id'] ? 'selected' : '' ?>>
+                                            <?= $department['name'] ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="faculty" class="form-label">Fakülte</label>
+                                <select class="form-select" id="faculty" name="faculty_id">
+                                    <?php foreach ($faculties as $faculty) : ?>
+                                        <option value="<?= $faculty['id'] ?>" <?= $faculty['id'] === $student['department_id'] ? 'selected' : '' ?>>
+                                            <?= $faculty['name'] ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="student_no" class="form-label ">Öğrenci No</label>
+                                <input type="text" class="form-control" id="student_no" name="student_no" value="<?= $student['student_no'] ?>">
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Şifre</label>
+                                <input type="password" class="form-control" id="password" name="password" value="<?= openssl_dec($student['password']) ?>">
+                            </div>
+                            <div class="mb-3">
+                                <label for="advisor" class="form-label">Danışman</label>
+                                <select class="form-select" id="advisor" name="advisor_id">
+                                    <?php foreach ($advisors as $advisor) : ?>
+                                        <option value="<?= $advisor['id'] ?>" <?= $advisor['id'] === $student['advisor_id'] ? 'selected' : '' ?>>
+                                            <?= $advisor['name'] ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="image" class="form-label">Profil Resmi</label>
+                                <input type="file" class="form-control" id="image" name="image" accept="image/*" value="<?= $student['image_url'] ?>">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Güncelle</button>
+                        </form>
                     </div>
                 </div>
+            </div>
         </section>
     </main>
 </body>

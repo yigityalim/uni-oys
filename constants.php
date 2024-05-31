@@ -3,8 +3,7 @@
 
 const METHOD = 'AES-128-ECB';
 const KEY = 'secret';
-
-const SEASON = 'Birinci Yarıyıl (Güz)';
+const SEASON = 1;
 
 function openssl_enc($data): bool|string
 {
@@ -51,7 +50,8 @@ function getMatchingDateRange($date): bool
 
     if (($currentDate >= $startDate && $currentDate <= $endDate) ||
         ($currentDateThisYear >= $startDate && $currentDateThisYear <= $endDate) ||
-        ($currentDateNextYear >= $startDate && $currentDateNextYear <= $endDate)) {
+        ($currentDateNextYear >= $startDate && $currentDateNextYear <= $endDate)
+    ) {
         return true;
     }
 

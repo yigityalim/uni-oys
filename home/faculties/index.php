@@ -1,20 +1,21 @@
 <?php
 session_start();
 if (!isset($_SESSION['student'])) {
-    header('location: /proje/auth/login/student');
+    header('location: /proje/auth/login');
 }
 require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/db.php';
-require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/constants.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/proje'. '/constants.php';
 
 $db = new Database();
 
 $student = $_SESSION['student'];
 $season_id = $_GET['season'] ?? SEASON;
+$faculty_id = $_GET['id'] ?? 1;
 
 $seasons = $db->from('courses')->select('season')->where('department_id', $student['department_id'])->distinct()->all();
-$courses = $db->from('courses')->where('season', $season_id)->where('department_id', $student['department_id'])->all();
-
-$academician = $db->from('lecturers')->where('id', $student['advisor_id'])->first();
+$faculty = $db->from('faculties')->where('id', $faculty_id)->first();
+$faculties = $db->from('faculties')->all();
+$courses = $db->from('courses')->where('department_id', $faculty['id'])->all();
 ?>
 <!doctype html>
 <html lang="en">
@@ -25,9 +26,6 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="/proje/public/bootstrap.min.css" rel="stylesheet">
     <script src="/proje/public/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-          integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
-          crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <title>ÖYS | Öğrenci</title>
 </head>
 <body class="bg-light">
@@ -40,7 +38,7 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
     <nav>
         <ul class="nav">
             <li class="nav-item">
-                <a class="nav-link text-black" href="/proje/home/student/index.php">Anasayfa</a>
+                <a class="nav-link text-black" href="/proje/home/student">Anasayfa</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link text-black" href="/proje/home/student/courses/">Dersler</a>
@@ -81,21 +79,21 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
             <li>
                 <hr class="dropdown-divider">
             </li>
-            <li><a class="dropdown-item text-danger" href="/proje/auth/logout/student.php">Çıkış Yap</a></li>
+            <li><a class="dropdown-item text-danger" href="/proje/auth/logout">Çıkış Yap</a></li>
         </ul>
     </div>
 </header>
-<main class="container-fluid mb-5" style="margin-top: 56px;">
+<main class="container-fluid" style="margin-top: 56px;">
     <header class="row">
         <div class="col-12 py-3">
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="d-flex w-100 justify-content-between">
-                            <h1 class="fw-light">Akademisyen</h1>
+                            <h1 class="fw-light"><?= $faculty['name'] ?></h1>
                             <div class="d-flex flex-column justify-content-center align-items-end">
                                 <p class="text-muted mb-0"><?= date('d.m.Y') ?></p>
-                                <p class="text-muted mb-0"><?= $season_id ?></p>
+                                <p class="text-muted mb-0">Tüm Dönemler</p>
                             </div>
                         </div>
                     </div>
@@ -106,8 +104,7 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
                                     <a href="/proje/home/student" class="text-decoration-none">Ana sayfa</a>
                                 </li>
                                 <li class="breadcrumb-item">
-                                    <a href="/proje/home/student/academician"
-                                       class="text-decoration-none">Akademisyen</a>
+                                    <a href="/proje/home/student/faculties" class="text-decoration-none">Fakülteler</a>
                                 </li>
                             </ul>
                         </nav>
@@ -115,53 +112,66 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
                 </div>
             </div>
         </div>
-        <h1 class="text-start fs-3 mb-3 mt-2">Merhaba, <?= $student['name'] ?>!</h1>
+        <h1 class="text-start fs-3 mb-3 mt-2">Hoşgeldin, <?= $student['name'] ?>!</h1>
     </header>
     <section>
         <div class="row gx-3">
-            <div class="col-2">
-                <div class="p-3 border bg-light rounded-3">
-                    <h5 class="fw-light">Gezinme</h5>
-                    <ul class="nav flex-column">
-                        <?php foreach ($courses as $course): ?>
-                            <li class="nav-item">
-                                <a class="nav-link text-primary"
-                                   href="/proje/home/student/courses/index.php?code=<?= $course['code'] ?>">
-                                    <?= $course['code'] ?>
+            <?php if (!empty($courses)): ?>
+                <div class="col-2">
+                    <div class="p-3 border bg-light rounded-3">
+                        <h5 class="fw-light">Gezinme</h5>
+                        <ul class="nav flex-column">
+                            <?php foreach ($courses as $course): ?>
+                                <li class="nav-item">
+                                    <a class="nav-link text-primary"
+                                       href="/proje/home/student/courses/index.php?code=<?= $course['code'] ?>">
+                                        <?= $course['code'] ?>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <div class="<?= !empty($courses) ? 'col-10' : 'col-12' ?>">
+                <div class="w-100 p-3 border bg-light rounded-3">
+                    <h1 class="fw-light fs-3">Tüm Fakülteler</h1>
+                    <p class="w-25 d-inline-flex gap-1">
+                        <a class="btn btn-primary w-100" data-bs-toggle="collapse" href="#collapseExample" role="button"
+                           aria-expanded="false" aria-controls="collapseExample">
+                            Aç
+                        </a>
+                    </p>
+                    <div class="collapse" id="collapseExample">
+                        <div class="card card-body">
+                            <?php foreach ($faculties as $faculty): ?>
+                                <a href="/proje/home/student/faculties/index.php?id=<?= $faculty['id'] ?>"
+                                   class="text-decoration-none text-primary">
+                                    <?= $faculty['name'] ?>
                                 </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <h1 class="fw-light fs-3 mt-3">Dersler</h1>
+                    <ul class="list-group list-group-flush">
+                        <?php if (empty($courses)): ?>
+                            <li class="list-group list-group-item mb-1 rounded  ">
+                                <p class="text-muted mb-0">Henüz ders eklenmemiş.</p>
                             </li>
-                        <?php endforeach; ?>
+                        <?php else: ?>
+                            <?php foreach ($courses as $course): ?>
+                                <li class="list-group list-group-item mb-1 rounded  ">
+                                    <a href="/proje/home/student/courses/index.php?code=<?= $course['code'] ?>"
+                                       class="text-decoration-none text-primary">
+                                        <?= $course['name'] ?>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </div>
-            <div class="col-10">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex gap-3 align-items-center mb-5 ">
-                            <img src="<?= $academician['image_url'] ?>" class="rounded-circle" width="100"
-                                 alt="Profil Resmi" style="aspect-ratio: 1/1; object-fit: cover; object-position: top;">
-                            <div class="d-flex flex-column justify-content-center align-items-start">
-                                <h1 class="fw-bold"><?= $academician['title'] ?> <?= $academician['name'] ?></h1>
-                                <a href="tel:<?= $academician['phone'] ?>" class="card-text">
-                                    +90 <?= $academician['phone'] ?>
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="my-3">
-                            <label for="room" class="form-label">Oda Numarası</label>
-                            <input type="text" id="room" class="form-control" value="<?= $academician['room'] ?>"
-                                   disabled>
-                        </div>
-                        <form action="/proje/student/profile">
-                            <label for="message" class="form-label">Mesajınız</label>
-                            <textarea name="message" id="message" class="form-control" rows="5"></textarea>
-                            <button type="submit" class="mt-3 w-100 btn btn-primary">Gönder</button>
-                        </form>
-                        <a href="/proje/home/student/profile" class="mt-3 w-100 btn btn-danger">Hocayı Değiştir</a>
-                    </div>
-                </div>
-            </div>
+        </div>
     </section>
 </main>
 </body>

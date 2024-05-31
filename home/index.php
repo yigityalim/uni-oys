@@ -7,14 +7,15 @@ require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/db.php';
 require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/constants.php';
 
 $db = new Database();
+$path = rtrim($_SERVER['PHP_SELF'], '/');
 
 $student = $_SESSION['student'];
 $season_id = $_GET['season'] ?? SEASON;
 
-$seasons = $db->from('courses')->select('season')->where('department_id', $student['department_id'])->distinct()->all();
 $courses = $db->from('courses')->where('season', $season_id)->where('department_id', $student['department_id'])->all();
-
-$academician = $db->from('lecturers')->where('id', $student['advisor_id'])->first();
+$seasons = $db->from('seasons')->all();
+$faculties = $db->from('faculties')->all();
+$departments = $db->from('departments')->all();
 ?>
 <!doctype html>
 <html lang="en">
@@ -53,7 +54,7 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
         <div class="dropdown ms-auto">
             <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <?= $student['name'] ?>
-                <img src="/proje/<?= $student['image_url'] ?>" width="30" class="ms-2 rounded-circle" alt="Avatar">
+                <img src="/proje/<?= $student['image_url'] ?>" width="30" height="30" class="ms-2 rounded-circle object-fit-cover ratio-1x1" alt="Avatar">
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" href="/proje/home/profile">Profil</a></li>
@@ -68,11 +69,9 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
                 <li>
                     <hr class="dropdown-divider">
                 </li>
-                <?php foreach ($seasons as $season) : ?>
-                    <li>
-                        <a class="dropdown-item <?= isset($_GET['season']) && $_GET['season'] === $season['season'] ? 'active' : '' ?>" href="/proje/home/index.php?season=<?= $season['season'] ?>"><?= $season['season'] ?></a>
-                    </li>
-                <?php endforeach; ?>
+                <li>
+                    <a class="dropdown-item text-primary" href="/proje/home">Anasayfa</a>
+                </li>
                 <li>
                     <hr class="dropdown-divider">
                 </li>
@@ -80,17 +79,17 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
             </ul>
         </div>
     </header>
-    <main class="container-fluid mb-5" style="margin-top: 56px;">
+    <main class="container-fluid" style="margin-top: 56px;">
         <header class="row">
             <div class="col-12 py-3">
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div class="d-flex w-100 justify-content-between">
-                                <h1 class="fw-light">Akademisyen</h1>
+                                <h1 class="fw-light">Öğretim Yönetim Sistemi</h1>
                                 <div class="d-flex flex-column justify-content-center align-items-end">
                                     <p class="text-muted mb-0"><?= date('d.m.Y') ?></p>
-                                    <p class="text-muted mb-0"><?= $season_id ?></p>
+                                    <p class="text-muted mb-0"><?= $db->from('seasons')->where('id', $season_id)->first()['season_name'] ?></p>
                                 </div>
                             </div>
                         </div>
@@ -100,16 +99,13 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
                                     <li class="breadcrumb-item">
                                         <a href="/proje/home" class="text-decoration-none">Ana sayfa</a>
                                     </li>
-                                    <li class="breadcrumb-item">
-                                        <a href="/proje/home/academician" class="text-decoration-none">Akademisyen</a>
-                                    </li>
                                 </ul>
                             </nav>
                         </div>
                     </div>
                 </div>
             </div>
-            <h1 class="text-start fs-3 mb-3 mt-2">Merhaba, <?= $student['name'] ?>!</h1>
+            <h1 class="text-start fs-3 mb-3 mt-2">Hoşgeldin, <?= $student['name'] ?>!</h1>
         </header>
         <section>
             <div class="row gx-3">
@@ -119,7 +115,7 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
                         <ul class="nav flex-column">
                             <?php foreach ($courses as $course) : ?>
                                 <li class="nav-item">
-                                    <a class="nav-link text-primary" href="/proje/home/courses/index.php?code=<?= $course['code'] ?>">
+                                    <a class="nav-link text-primary" href="/proje/home/courses/index.php?code=<?= $course['code'] ?>&season=<?= $season_id ?>">
                                         <?= $course['code'] ?>
                                     </a>
                                 </li>
@@ -128,31 +124,59 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
                     </div>
                 </div>
                 <div class="col-10">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="d-flex gap-3 align-items-center mb-5 ">
-                                <img src="<?= $academician['image_url'] ?>" class="rounded-circle" width="100" alt="Profil Resmi" style="aspect-ratio: 1/1; object-fit: cover; object-position: top;">
-                                <div class="d-flex flex-column justify-content-center align-items-start">
-                                    <h1 class="fw-bold"><?= $academician['title'] ?> <?= $academician['name'] ?></h1>
-                                    <a href="tel:<?= $academician['phone'] ?>" class="card-text">
-                                        +90 <?= $academician['phone'] ?>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <div class="my-3">
-                                <label for="room" class="form-label">Oda Numarası</label>
-                                <input type="text" id="room" class="form-control" value="<?= $academician['room'] ?>" disabled>
-                            </div>
-                            <form action="/proje/profile">
-                                <label for="message" class="form-label">Mesajınız</label>
-                                <textarea name="message" id="message" class="form-control" rows="5"></textarea>
-                                <button type="submit" class="mt-3 w-100 btn btn-primary">Gönder</button>
-                            </form>
-                            <a href="/proje/home/profile" class="mt-3 w-100 btn btn-danger">Hocayı Değiştir</a>
+                    <div class="p-3 border bg-light rounded-3">
+                        <div class="mb-4 d-flex justify-content-between align-items-center">
+                            <h1 class="fw-light fs-3">Ders Kategorileri</h1>
+                            <a data-bs-toggle="collapse" data-bs-target=".multi-collapse" class="btn btn-primary">
+                                Hepsini Görüntüle
+                            </a>
                         </div>
+                        <form action="/proje/home/index.php" method="get" class="mb-4">
+                            <div class="input-group">
+                                <form action="<?= $_SERVER['PHP_SELF'] ?>" method="get">
+                                    <select name="season" class="form-select" aria-label="Season">
+                                        <?php foreach($seasons as $season) : ?>
+                                            <option value="<?= $season['id'] ?>" <?= $season['id'] === $season_id ? 'selected' : '' ?> >
+                                                <?= $season['season_name'] ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </form>
+                                <button class="btn btn-primary" type="submit">Filtrele</button>
+                            </div>
+                        </form>
+                        <ul class="list-group list-group-flush">
+                            <?php foreach ($faculties as $faculty) : ?>
+                                <li class="list-group list-group-item mb-1 rounded">
+                                    <a onclick="this.querySelector('i').classList.toggle('fa-chevron-down');this.querySelector('i').classList.toggle('fa-chevron-up');" data-bs-toggle="collapse" href="#collapse_course_<?= $faculty['id'] ?>" href="/proje/home/faculties/index.php?id=<?= $faculty['id'] ?>" class="w-100 d-inline-flex justify-content-between align-items-center text-decoration-none text-dark">
+                                        <?= $faculty['name'] ?>
+                                        <i class="fa-solid fa-chevron-down"></i>
+                                    </a>
+                                    <div class="collapse multi-collapse" id="collapse_course_<?= $faculty['id'] ?>">
+                                        <ul class="list-group list-group-flush">
+                                            <?php foreach ($db->from('courses')->where(
+                                                'season',
+                                                $season_id
+                                            )->where(
+                                                'department_id',
+                                                $faculty['id']
+                                            )->all() as $faculty_course) : ?>
+                                                <?php if ($faculty_course['department_id'] === $faculty['id']) : ?>
+                                                    <li class="list-group list-group-item mb-1 rounded">
+                                                        <a href="/proje/home/courses/index.php?code=<?= $faculty_course['code'] ?>" class="text-decoration-none text-dark">
+                                                            <?= $faculty_course['name'] ?>
+                                                        </a>
+                                                    </li>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
                     </div>
                 </div>
+            </div>
         </section>
     </main>
 </body>

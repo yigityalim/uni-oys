@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['student'])) {
-    header('location: /proje/auth/login/student');
+    header('location: /proje/auth/login');
 }
 require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/db.php';
 require $_SERVER['DOCUMENT_ROOT'] . '/proje' . '/constants.php';
@@ -29,23 +29,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $image = post('image');
     $password = post('password');
 
-    if (
-        !$name || !$email
-    ) {
-        $errors[] = 'Lütfen tüm alanları doldurunuz.';
-    }
+    if (!$name || !$email) $errors[] = 'Lütfen tüm alanları doldurunuz.';
 
     if (empty($errors)) {
         $db->update('students')->where('id', $student['id'])->set([
             'name' => $name,
             'email' => $email,
-            'password' => $password,
+            'password' => openssl_enc($password),
             'department_id' => $department_id,
             'advisor_id' => $lecturer_id,
         ]);
         $student = $db->from('students')->where('id', $student['id'])->first();
         $_SESSION['student'] = $student;
-        header('location: /proje/home/student/profile');
+        header('location: /proje/home/profile');
     }
 }
 
