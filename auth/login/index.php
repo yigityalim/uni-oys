@@ -35,6 +35,7 @@ endif;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paket Üni | Giriş Yap</title>
     <link href="/proje/public/bootstrap.min.css" rel="stylesheet">
+    <script src="/proje/public/bootstrap.min.js"></script>
 </head>
 
 <body class="bg-light">

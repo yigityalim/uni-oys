@@ -11,8 +11,10 @@ $db = new Database();
 $student = $_SESSION['student'];
 $season_id = $_GET['season'] ?? SEASON;
 
-$seasons = $db->from('courses')->select('season')->where('department_id', $student['department_id'])->distinct()->all();
-$courses = $db->from('courses')->where('season', $season_id)->where('department_id', $student['department_id'])->all();
+$seasons = $db->from('courses')->select('season')->where('department_id',
+    $student['department_id'])->distinct()->all();
+$courses = $db->from('courses')->where('season', $season_id)->where('department_id',
+    $student['department_id'])->all();
 
 $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->first();
 ?>
@@ -25,14 +27,17 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="/proje/public/bootstrap.min.css" rel="stylesheet">
     <script src="/proje/public/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+          integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
     <title>ÖYS | Öğrenci</title>
 </head>
 
 <body class="bg-light">
     <header class="navbar justify-content-start fixed-top bg-white shadow-sm px-3 py-0">
         <a href="/proje/home" class="navbar-brand d-flex align-items-center m-1">
-            <img width="50" src="https://oys2.baskent.edu.tr/pluginfile.php/1/core_admin/logocompact/300x300/1709033358/kucuk.PNG" class="logo mr-1" alt="ÖYS">
+            <img width="50" src="https://oys2.baskent.edu.tr/pluginfile.php/1/core_admin/logocompact/300x300/1709033358/kucuk.PNG"
+                 class="logo mr-1" alt="ÖYS">
         </a>
         <nav>
             <ul class="nav">
@@ -66,13 +71,14 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
                     <a class="dropdown-item" href="/proje/home/courses">Tüm Dersler</a>
                 </li>
                 <li>
+                    <a class="dropdown-item" href="/proje/home/faculties">Fakülteler ve Dersler</a>
+                </li>
+                <li>
                     <hr class="dropdown-divider">
                 </li>
-                <?php foreach ($seasons as $season) : ?>
-                    <li>
-                        <a class="dropdown-item <?= isset($_GET['season']) && $_GET['season'] === $season['season'] ? 'active' : '' ?>" href="/proje/home/index.php?season=<?= $season['season'] ?>"><?= $season['season'] ?></a>
-                    </li>
-                <?php endforeach; ?>
+                <li>
+                    <a class="dropdown-item text-primary" href="/proje/home">Anasayfa</a>
+                </li>
                 <li>
                     <hr class="dropdown-divider">
                 </li>
@@ -131,7 +137,8 @@ $academician = $db->from('lecturers')->where('id', $student['advisor_id'])->firs
                     <div class="card">
                         <div class="card-body">
                             <div class="d-flex gap-3 align-items-center mb-5 ">
-                                <img src="<?= $academician['image_url'] ?>" class="rounded-circle" width="100" alt="Profil Resmi" style="aspect-ratio: 1/1; object-fit: cover; object-position: top;">
+                                <img src="<?= $academician['image_url'] ?>" class="rounded-circle" width="100" alt="Profil Resmi"
+                                     style="aspect-ratio: 1/1; object-fit: cover; object-position: top;">
                                 <div class="d-flex flex-column justify-content-center align-items-start">
                                     <h1 class="fw-bold"><?= $academician['title'] ?> <?= $academician['name'] ?></h1>
                                     <a href="tel:<?= $academician['phone'] ?>" class="card-text">

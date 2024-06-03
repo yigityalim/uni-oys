@@ -11,8 +11,10 @@ $db = new Database();
 $student = $_SESSION['student'];
 $season_id = $_GET['season'] ?? SEASON;
 
-$seasons = $db->from('courses')->select('season')->where('department_id', $student['department_id'])->distinct()->all();
-$courses = $db->from('courses')->where('season', $season_id)->where('department_id', $student['department_id'])->all();
+$seasons = $db->from('courses')->select('season')->where('department_id',
+    $student['department_id'])->distinct()->all();
+$courses = $db->from('courses')->where('season', $season_id)->where('department_id',
+    $student['department_id'])->all();
 $faculties = $db->from('faculties')->all();
 $departments = $db->from('departments')->all();
 $advisors = $db->from('lecturers')->where('department_id', $student['department_id'])->all();
@@ -26,14 +28,17 @@ $advisors = $db->from('lecturers')->where('department_id', $student['department_
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="/proje/public/bootstrap.min.css" rel="stylesheet">
     <script src="/proje/public/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+          integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
     <title>ÖYS | Öğrenci</title>
 </head>
 
 <body class="bg-light">
     <header class="navbar justify-content-start fixed-top bg-white shadow-sm px-3 py-0">
         <a href="/proje/home" class="navbar-brand d-flex align-items-center m-1">
-            <img width="50" src="https://oys2.baskent.edu.tr/pluginfile.php/1/core_admin/logocompact/300x300/1709033358/kucuk.PNG" class="logo mr-1" alt="ÖYS">
+            <img width="50" src="https://oys2.baskent.edu.tr/pluginfile.php/1/core_admin/logocompact/300x300/1709033358/kucuk.PNG"
+                 class="logo mr-1" alt="ÖYS">
         </a>
         <nav>
             <ul class="nav">
@@ -62,17 +67,19 @@ $advisors = $db->from('lecturers')->where('department_id', $student['department_
                     <hr class="dropdown-divider">
                 </li>
                 <li><a class="dropdown-item" href="/proje/home/academician">Akademisyen</a></li>
+                <li><a class="dropdown-item" href="/proje/home/grade">Başarı Notlarım</a></li>
                 <li>
                     <a class="dropdown-item" href="/proje/home/courses">Tüm Dersler</a>
                 </li>
                 <li>
+                    <a class="dropdown-item" href="/proje/home/faculties">Fakülteler ve Dersler</a>
+                </li>
+                <li>
                     <hr class="dropdown-divider">
                 </li>
-                <?php foreach ($seasons as $season) : ?>
-                    <li>
-                        <a class="dropdown-item <?= isset($_GET['season']) && $_GET['season'] === $season['season'] ? 'active' : '' ?>" href="/proje/home/student/index.php?season=<?= $season['season'] ?>"><?= $season['season'] ?></a>
-                    </li>
-                <?php endforeach; ?>
+                <li>
+                    <a class="dropdown-item text-primary" href="/proje/home">Anasayfa</a>
+                </li>
                 <li>
                     <hr class="dropdown-divider">
                 </li>
@@ -139,7 +146,9 @@ $advisors = $db->from('lecturers')->where('department_id', $student['department_
                                 <label for="department" class="form-label">Bölüm</label>
                                 <select class="form-select" id="department" name="department_id">
                                     <?php foreach ($departments as $department) : ?>
-                                        <option value="<?= $department['id'] ?>" <?= $department['id'] === $student['department_id'] ? 'selected' : '' ?>>
+                                        <option value="<?= $department['id'] ?>" <?= $department['id'] === $student['department_id']
+                                            ? 'selected' : '' ?>
+                                        >
                                             <?= $department['name'] ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -149,7 +158,9 @@ $advisors = $db->from('lecturers')->where('department_id', $student['department_
                                 <label for="faculty" class="form-label">Fakülte</label>
                                 <select class="form-select" id="faculty" name="faculty_id">
                                     <?php foreach ($faculties as $faculty) : ?>
-                                        <option value="<?= $faculty['id'] ?>" <?= $faculty['id'] === $student['department_id'] ? 'selected' : '' ?>>
+                                        <option value="<?= $faculty['id'] ?>" <?= $faculty['id'] === $student['department_id']
+                                            ? 'selected' : '' ?>
+                                        >
                                             <?= $faculty['name'] ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -157,17 +168,20 @@ $advisors = $db->from('lecturers')->where('department_id', $student['department_
                             </div>
                             <div class="mb-3">
                                 <label for="student_no" class="form-label ">Öğrenci No</label>
-                                <input type="text" class="form-control" id="student_no" name="student_no" value="<?= $student['student_no'] ?>">
+                                <input type="text" class="form-control" id="student_no" name="student_no"
+                                       value="<?= $student['student_no'] ?>">
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Şifre</label>
-                                <input type="password" class="form-control" id="password" name="password" value="<?= openssl_dec($student['password']) ?>">
+                                <input type="password" class="form-control" id="password" name="password"
+                                       value="<?= openssl_dec($student['password']) ?>">
                             </div>
                             <div class="mb-3">
                                 <label for="advisor" class="form-label">Danışman</label>
                                 <select class="form-select" id="advisor" name="advisor_id">
                                     <?php foreach ($advisors as $advisor) : ?>
-                                        <option value="<?= $advisor['id'] ?>" <?= $advisor['id'] === $student['advisor_id'] ? 'selected' : '' ?>>
+                                        <option value="<?= $advisor['id'] ?>"
+                                            <?= $advisor['id'] === $student['advisor_id'] ? 'selected' : '' ?>>
                                             <?= $advisor['name'] ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -175,7 +189,8 @@ $advisors = $db->from('lecturers')->where('department_id', $student['department_
                             </div>
                             <div class="mb-3">
                                 <label for="image" class="form-label">Profil Resmi</label>
-                                <input type="file" class="form-control" id="image" name="image" accept="image/*" value="<?= $student['image_url'] ?>">
+                                <input type="file" class="form-control" id="image" name="image" accept="image/*"
+                                       value="<?= $student['image_url'] ?>">
                             </div>
                             <button type="submit" class="btn btn-primary">Güncelle</button>
                         </form>

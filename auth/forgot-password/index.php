@@ -42,6 +42,7 @@ if (isset($_POST['student_no'], $_POST['password'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paket Üni | Şifrenizi mi unuttunuz?</title>
     <link href="/proje/public/bootstrap.min.css" rel="stylesheet">
+    <script src="/proje/public/bootstrap.min.js"></script>
 </head>
 
 <body class="bg-light">
@@ -51,7 +52,8 @@ if (isset($_POST['student_no'], $_POST['password'])) {
                 <div class="card">
                     <div class="card-body">
                         <div class="text-center mb-4">
-                            <img src="https://oys2.baskent.edu.tr/pluginfile.php/1/core_admin/logo/0x200/1709033358/oys_banner.jpg" alt="Baskent University" class="img-fluid">
+                            <img src="https://oys2.baskent.edu.tr/pluginfile.php/1/core_admin/logo/0x200/1709033358/oys_banner.jpg"
+                                 alt="Baskent University" class="img-fluid">
                         </div>
                         <?php if ($error) : ?>
                             <div class="alert alert-danger" role="alert">
@@ -74,7 +76,8 @@ if (isset($_POST['student_no'], $_POST['password'])) {
                             </div>
                             <div class="form-group mb-3">
                                 <label for="new_password_confirmation">Yeni Şifre Tekrar</label>
-                                <input type="password" name="new_password_confirmation" id="new_password_confirmation" class="form-control" required>
+                                <input type="password" name="new_password_confirmation" id="new_password_confirmation"
+                                       class="form-control" required>
                             </div>
                             <button type="submit" class="w-100 btn btn-primary">Şifremi Değiştir</button>
                             <a href="/proje/auth/login" class="btn btn-link">Giriş Yap</a>

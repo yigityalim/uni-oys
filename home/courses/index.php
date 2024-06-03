@@ -10,17 +10,17 @@ $db = new Database();
 $error = false;
 $path = rtrim($_SERVER['PHP_SELF'], '/');
 $student = $_SESSION['student'];
-$season_id = SEASON;
+$season_id = $_GET['season'] ?? SEASON;
 $course = null;
 
-$seasons = $db->from('courses')->select('season')->where('department_id', $student['department_id'])->distinct()->all();
-$courses = $db->from('courses')->where('season', $season_id)->where('department_id', $student['department_id'])->all();
+$seasons = $db->from('courses')->select('season')->where('department_id',
+    $student['department_id'])->distinct()->all();
+$courses = $db->from('courses')->where('season', $season_id)->where('department_id',
+    $student['department_id'])->all();
 if (isset($_GET['code'])) {
     $course = $db->from('courses')->where('code', $_GET['code'])->first();
 }
-if (!$course) {
-    $error = true;
-}
+if (!$course) $error = true;
 
 $dates = [
     'Genel',
@@ -59,7 +59,7 @@ $dates = [
 
 <body class="bg-light">
 <header class="navbar justify-content-start fixed-top bg-white shadow-sm px-3 py-0">
-    <a href="/proje/home/student" class="navbar-brand d-flex align-items-center m-1">
+    <a href="/proje/home" class="navbar-brand d-flex align-items-center m-1">
         <img width="50"
              src="https://oys2.baskent.edu.tr/pluginfile.php/1/core_admin/logocompact/300x300/1709033358/kucuk.PNG"
              class="logo mr-1" alt="ÖYS">
@@ -96,14 +96,14 @@ $dates = [
                 <a class="dropdown-item" href="/proje/home/courses">Tüm Dersler</a>
             </li>
             <li>
+                <a class="dropdown-item" href="/proje/home/faculties">Fakülteler ve Dersler</a>
+            </li>
+            <li>
                 <hr class="dropdown-divider">
             </li>
-            <?php foreach ($seasons as $season) : ?>
-                <li>
-                    <a class="dropdown-item <?= isset($_GET['season']) && $_GET['season'] === $season['season'] ? 'active' : '' ?>"
-                       href="<?= $path ?>?season=<?= $season['season'] ?>"><?= $season['season'] ?></a>
-                </li>
-            <?php endforeach; ?>
+            <li>
+                <a class="dropdown-item text-primary" href="/proje/home">Anasayfa</a>
+            </li>
             <li>
                 <hr class="dropdown-divider">
             </li>
@@ -128,7 +128,8 @@ $dates = [
                             </h1>
                             <div class="d-flex flex-column justify-content-center align-items-end">
                                 <p class="text-muted mb-0"><?= date('d.m.Y') ?></p>
-                                <p class="text-muted mb-0"><?= $season_id ?></p>
+                                <p class="text-muted mb-0"><?= $db->from('seasons')->where('id',
+                                        $season_id)->first()['season_name'] ?></p>
                             </div>
                         </div>
                     </div>
@@ -175,14 +176,12 @@ $dates = [
                         <?php endforeach; ?>
                     </ul>
                 </div>
-                <!--
-                    <?php if (isset($_GET['code'])) : ?>
-                        <div class="p-3 border bg-light rounded-3 mt-3">
-                            <h5 class="fw-light">Ders Yönetimi</h5>
-                                <a href="/proje/home/courses/delete.php?id=<?= $course['id'] ?>" class="btn btn-primary w-100">Dersi Kaldır</a>
-
-                        </div>
-                -->
+                <?php if (isset($_GET['code'])) : ?>
+                    <div class="p-3 border bg-light rounded-3 mt-3">
+                        <h5 class="fw-light pb-2">Ders Yönetimi</h5>
+                        <a class="btn btn-danger w-100" href="/proje/home/courses/delete.php?id=<?= $course['id'] ?>">Dersi
+                            Kaldır</a>
+                    </div>
                 <?php endif; ?>
             </div>
             <div class="col-10">
@@ -191,7 +190,8 @@ $dates = [
                         <div class="d-flex flex-column gap-3 align-items-start justify-content-center">
                             <?php foreach ($dates as $index => $week) : ?>
                                 <a data-bs-toggle="collapse" href="#collapse-<?= $index ?>"
-                                   class="text-black text-decoration-none border-bottom w-100 p-3 d-flex gap-3 align-items-center justify-content-start"
+                                   class="text-black text-decoration-none border-bottom w-100 p-3 d-flex gap-3
+                                    align-items-center justify-content-start"
                                    style="<?= (getMatchingDateRange($week)) ? 'border-left: 5px solid #0d6efd;' : ''; ?>">
                                     <i class="fa-solid fa-chevron-right"></i>
                                     <h4 class="fw-light mb-0"><?= htmlspecialchars($week, ENT_QUOTES, 'UTF-8'); ?></h4>

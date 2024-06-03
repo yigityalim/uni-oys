@@ -1,4 +1,4 @@
-# Paket Üniversitesi
+# Üniversite Yönetim Sistemi
 
 Bu proje **YBS364** dersi projesidir.
 
@@ -8,7 +8,7 @@ Bu projeyi `htdocs` klasörü içerisinde `proje` klasörü içerisine kopyalay�
 
 Daha sonrasında ise `http://localhost/proje/init.php` adresine gidin. Kurulumu başlatın. 
 
-Arından `http://localhost/proje/auth/login` adresine giderek projeye giriş yapabilirsiniz.
+Ardından `http://localhost/proje/auth/login` adresine giderek projeye giriş yapabilirsiniz.
 
 
 - Kullanılan Teknolojiler;
@@ -17,4 +17,4 @@ Arından `http://localhost/proje/auth/login` adresine giderek projeye giriş yap
     - [PHP](https://php.net)
 - Hazırlayanlar
     - [Mehmet Yiğit Yalım](https://mehmetyigityalim.com)
-    - [Özgür Özgün]()
+    - [Özgür Özgün](https://instagram.com/ozgur.irl)

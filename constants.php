@@ -1,6 +1,6 @@
 <?php
 
-
+const PROJECT_NAME = 'yigitozgur';
 const METHOD = 'AES-128-ECB';
 const KEY = 'secret';
 const SEASON = 1;

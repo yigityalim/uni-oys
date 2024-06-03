@@ -11,8 +11,10 @@ $db = new Database();
 $student = $_SESSION['student'];
 $season_id = $_GET['season'] ?? SEASON;
 
-$seasons = $db->from('courses')->select('season')->where('department_id', $student['department_id'])->distinct()->all();
-$courses = $db->from('courses')->where('season', $season_id)->where('department_id', $student['department_id'])->all();
+$seasons = $db->from('courses')->select('season')->where('department_id',
+    $student['department_id'])->distinct()->all();
+$courses = $db->from('courses')->where('season', $season_id)->where('department_id',
+    $student['department_id'])->all();
 $faculties = $db->from('faculties')->all();
 $departments = $db->from('departments')->all();
 $student_department = $db->from('departments')->where('id', $student['department_id'])->first();
@@ -33,6 +35,7 @@ function calcStyleOnStatus($status): string
         'Muaf' => 'table-warning',
         'Sayıldı' => 'table-info',
         'Tekrar' => 'table-primary',
+        'Şu an Almakta' => 'table-secondary',
         default => '',
     };
 }
@@ -47,9 +50,7 @@ function calcStyleOnStatus($status): string
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="/proje/public/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-            crossorigin="anonymous"></script>
+    <script src="/proje/public/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
           integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
@@ -98,6 +99,9 @@ function calcStyleOnStatus($status): string
             <li><a class="dropdown-item" href="/proje/home/grade">Başarı Notlarım</a></li>
             <li>
                 <a class="dropdown-item" href="/proje/home/courses">Tüm Dersler</a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="/proje/home/faculties">Fakülteler ve Dersler</a>
             </li>
             <li>
                 <hr class="dropdown-divider">
@@ -164,76 +168,89 @@ function calcStyleOnStatus($status): string
             <div class="col-10">
                 <div class="p-3 border bg-light rounded-3">
                     <h2 class="fw-normal">Aldığım Dersler</h2>
-                    <table class="table table-striped table-hover table-bordered table-responsive table-responsive-md table-responsive-lg table-responsive-xl table-responsive-xxl">
-                        <thead>
-                        <tr>
-                            <th>Yarıyıl</th>
-                            <th>Ders Kodu</th>
-                            <th>AKTS</th>
-                            <th>Ders Adı</th>
-                            <th>Ders Notu</th>
-                            <th>Durum</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($student_courses as $student_course) : ?>
+                    <?php if (empty($student_courses)): ?>
+                        <div class="alert alert-danger" role="alert">
+                            Bu öğrenciye ders eklenmemiş. Ekleyip tekrar deneyiniz.
+                        </div>
+                    <?php else: ?>
+                        <table class="table table-striped table-hover table-bordered table-responsive
+                        table-responsive-md table-responsive-lg table-responsive-xl table-responsive-xxl">
+                            <thead>
                             <tr>
-                                <td><?= $student_course['semester'] ?></td>
-                                <td><?= $student_course['code'] ?></td>
-                                <td><?= $student_course['credit'] ?></td>
-                                <td><?= $student_course['name'] ?></td>
-                                <td class="<?= calcStyleOnStatus($student_course['status_name']) ?>">
-                                    <p type="button" class="mb-0 h-100 w-100 d-inline-flex flex-column gap-2 text-center"
-                                       data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                       data-bs-custom-class="custom-tooltip"
-                                       data-bs-title="<?= $student_course['grade'] ?>"
-                                    >
+                                <th>Yarıyıl</th>
+                                <th>Ders Kodu</th>
+                                <th>AKTS</th>
+                                <th>Ders Adı</th>
+                                <th>Ders Notu</th>
+                                <th>Durum</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($student_courses as $student_course) : ?>
+                                <tr>
+                                    <td><?= $student_course['semester'] ?></td>
+                                    <td><?= $student_course['code'] ?></td>
+                                    <td><?= $student_course['credit'] ?></td>
+                                    <td><?= $student_course['name'] ?></td>
+                                    <td class="<?= calcStyleOnStatus($student_course['status_name']) ?>">
+                                        <p type="button" class="mb-0 h-100 w-100 d-inline-flex flex-column gap-2 text-center"
+                                           data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                           data-bs-custom-class="custom-tooltip"
+                                           data-bs-title="<?= $student_course['grade'] ?>"
+                                        >
                                         <span class="fw-bold">
                                             <?= $student_course['code'] ?>
                                         </span>
-                                        (<?= $student_course['grade'] ?>)
-                                    </p>
-                                </td>
-                                <td class="<?= calcStyleOnStatus($student_course['status_name']) ?>"><?= $student_course['status_name'] ?></td>
+                                            (<?= $student_course['grade'] ?>)
+                                        </p>
+                                    </td>
+                                    <td class="<?= calcStyleOnStatus($student_course['status_name']) ?>">
+                                        <?= $student_course['status_name'] ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </table>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <p class="text-muted">Öğrenci Katalog Akts Toplamı = 245</p>
+                            <p class="text-muted">Öğrenci Aldığı Dersler Akts Toplamı
+                                = <?= array_sum(array_column($student_courses, 'credit')) ?></p>
+                        </div>
+                        <h5 class="fw-normal mt-5">Renk Açıklamaları</h5>
+                        <table class="table table-striped table-hover table-bordered table-responsive
+                        table-responsive-md table-responsive-lg table-responsive-xl table-responsive-xxl">
+                            <thead>
+                            <tr>
+                                <th>Not</th>
+                                <th>Durum</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </table>
-                    <div class="d-flex align-items-center justify-content-between">
-                        <p class="text-muted">Öğrenci Katalog Akts Toplamı = 245</p>
-                        <p class="text-muted">Öğrenci Aldığı Dersler Akts Toplamı
-                            = <?= array_sum(array_column($student_courses, 'credit')) ?></p>
-                    </div>
-                    <h5 class="fw-normal mt-5">Renk Açıklamaları</h5>
-                    <table class="table table-striped table-hover table-bordered table-responsive table-responsive-md table-responsive-lg table-responsive-xl table-responsive-xxl">
-                        <thead>
-                        <tr>
-                            <th>Not</th>
-                            <th>Durum</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td class="table-success">AA</td>
-                            <td>Alındı</td>
-                        </tr>
-                        <tr>
-                            <td class="table-danger">FF</td>
-                            <td>Kaldı</td>
-                        </tr>
-                        <tr>
-                            <td class="table-warning">MM</td>
-                            <td>Muaf</td>
-                        </tr>
-                        <tr>
-                            <td class="table-info text-dark">DD</td>
-                            <td>Sayıldı</td>
-                        </tr>
-                        <tr>
-                            <td class="table-primary">DC</td>
-                            <td>Tekrar</td>
-                        </tr>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td class="table-success">AA</td>
+                                <td>Alındı</td>
+                            </tr>
+                            <tr>
+                                <td class="table-danger">FF</td>
+                                <td>Kaldı</td>
+                            </tr>
+                            <tr>
+                                <td class="table-warning">MM</td>
+                                <td>Muaf</td>
+                            </tr>
+                            <tr>
+                                <td class="table-info text-dark">DD</td>
+                                <td>Sayıldı</td>
+                            </tr>
+                            <tr>
+                                <td class="table-primary">DC</td>
+                                <td>Tekrar</td>
+                            </tr>
+                            <tr>
+                                <td class="table-secondary">XX</td>
+                                <td>Şu an Almakta</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

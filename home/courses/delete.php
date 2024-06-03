@@ -6,7 +6,8 @@ $db = new Database();
 $id = $_GET['id'];
 
 // kursu silme işlemi
-// burada öğrencinin ders kaydını siliyoruz. DERS SİLİNMEYECEK.
+$db->delete('courses')->where('id', $id)->done();
+$db->delete('student_courses')->where('course_id', $id)->done();
 
 header('Location: /proje/home/courses/index.php');
 

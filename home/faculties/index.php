@@ -12,7 +12,8 @@ $student = $_SESSION['student'];
 $season_id = $_GET['season'] ?? SEASON;
 $faculty_id = $_GET['id'] ?? 1;
 
-$seasons = $db->from('courses')->select('season')->where('department_id', $student['department_id'])->distinct()->all();
+$seasons = $db->from('courses')->select('season')->where('department_id',
+    $student['department_id'])->distinct()->all();
 $faculty = $db->from('faculties')->where('id', $faculty_id)->first();
 $faculties = $db->from('faculties')->all();
 $courses = $db->from('courses')->where('department_id', $faculty['id'])->all();
@@ -30,7 +31,7 @@ $courses = $db->from('courses')->where('department_id', $faculty['id'])->all();
 </head>
 <body class="bg-light">
 <header class="navbar justify-content-start fixed-top bg-white shadow-sm px-3 py-0">
-    <a href="/proje/home/student" class="navbar-brand d-flex align-items-center m-1">
+    <a href="/proje/home" class="navbar-brand d-flex align-items-center m-1">
         <img width="50"
              src="https://oys2.baskent.edu.tr/pluginfile.php/1/core_admin/logocompact/300x300/1709033358/kucuk.PNG"
              class="logo mr-1" alt="ÖYS">
@@ -41,13 +42,13 @@ $courses = $db->from('courses')->where('department_id', $faculty['id'])->all();
                 <a class="nav-link text-black" href="/proje/home/student">Anasayfa</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-black" href="/proje/home/student/courses/">Dersler</a>
+                <a class="nav-link text-black" href="/proje/home/courses/">Dersler</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-black" href="/proje/home/student/grade">Başarı Notlarım</a>
+                <a class="nav-link text-black" href="/proje/home/grade">Başarı Notlarım</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-black" href="/proje/home/student/academician">Akademisyen</a>
+                <a class="nav-link text-black" href="/proje/home/academician">Akademisyen</a>
             </li>
         </ul>
     </nav>
@@ -58,24 +59,24 @@ $courses = $db->from('courses')->where('department_id', $faculty['id'])->all();
                  alt="Avatar">
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="/proje/home/student/profile">Profil</a></li>
+            <li><a class="dropdown-item" href="/proje/home/profile">Profil</a></li>
             <li>
                 <hr class="dropdown-divider">
             </li>
-            <li><a class="dropdown-item" href="/proje/home/student/academician">Akademisyen</a></li>
-            <li><a class="dropdown-item" href="/proje/home/student/grade">Başarı Notlarım</a></li>
+            <li><a class="dropdown-item" href="/proje/home/academician">Akademisyen</a></li>
+            <li><a class="dropdown-item" href="/proje/home/grade">Başarı Notlarım</a></li>
             <li>
-                <a class="dropdown-item" href="/proje/home/student/courses">Tüm Dersler</a>
+                <a class="dropdown-item" href="/proje/home/courses">Tüm Dersler</a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="/proje/home/faculties">Fakülteler ve Dersler</a>
             </li>
             <li>
                 <hr class="dropdown-divider">
             </li>
-            <?php foreach ($seasons as $season): ?>
-                <li>
-                    <a class="dropdown-item <?= isset($_GET['season']) && $_GET['season'] === $season['season'] ? 'active' : '' ?>"
-                       href="/proje/home/student/index.php?season=<?= $season['season'] ?>"><?= $season['season'] ?></a>
-                </li>
-            <?php endforeach; ?>
+            <li>
+                <a class="dropdown-item text-primary" href="/proje/home">Anasayfa</a>
+            </li>
             <li>
                 <hr class="dropdown-divider">
             </li>
